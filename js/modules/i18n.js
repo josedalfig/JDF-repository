@@ -160,6 +160,43 @@ const I18n = (() => {
       'pwa.dismiss': 'Fechar',
       'step2.orderBy': 'Ordenar por',
       'step1.select': 'Selecione',
+
+      // Como funciona modal
+      'how.eyebrow':  'Simples assim',
+      'how.title':    'Como funciona',
+      'how.s1.title': 'Informe sua origem',
+      'how.s1.desc':  'Digite a cidade ou aeroporto de onde você vai partir e quantas pessoas viajam.',
+      'how.s2.title': 'Defina datas e budget',
+      'how.s2.desc':  'Escolha as datas de ida e volta e informe o orçamento total disponível para a viagem.',
+      'how.s3.title': 'Descubra destinos',
+      'how.s3.desc':  'Mostramos todos os destinos que cabem no seu bolso, com voos, clima e avaliações.',
+      'how.s4.title': 'Compare e reserve',
+      'how.s4.desc':  'Filtre por clima, tipo de viagem e companhia aérea. Reserve direto no site da cia.',
+      'how.cta':      'Começar agora →',
+
+      // Destinos modal
+      'dest.eyebrow':  'Explore o mundo',
+      'dest.title':    'Destinos disponíveis',
+      'dest.tab.nat':  '🇧🇷 Brasil',
+      'dest.tab.int':  '🌎 Internacional',
+      'dest.from':     'a partir de',
+
+      // Deals carousel
+      'deals.eyebrow': '✦ Ofertas em destaque — clique para buscar',
+
+      // Country names
+      'country.argentina': 'Argentina',
+      'country.portugal':  'Portugal',
+      'country.chile':     'Chile',
+      'country.mexico':    'México',
+      'country.italia':    'Itália',
+      'country.eua':       'EUA',
+      'country.espanha':   'Espanha',
+      'country.colombia':  'Colômbia',
+
+      // Extra tags
+      'tag.europa':   'Europa',
+      'tag.historia': 'História',
     },
 
     en: {
@@ -287,6 +324,43 @@ const I18n = (() => {
       'pwa.dismiss': 'Close',
       'step2.orderBy': 'Sort by',
       'step1.select': 'Select',
+
+      // How it works modal
+      'how.eyebrow':  'Simple as that',
+      'how.title':    'How it works',
+      'how.s1.title': 'Enter your origin',
+      'how.s1.desc':  'Type the city or airport you\'re departing from and how many people are traveling.',
+      'how.s2.title': 'Set dates and budget',
+      'how.s2.desc':  'Choose departure and return dates and enter the total budget available for the trip.',
+      'how.s3.title': 'Discover destinations',
+      'how.s3.desc':  'We show all destinations that fit your budget, with flights, weather and ratings.',
+      'how.s4.title': 'Compare and book',
+      'how.s4.desc':  'Filter by climate, trip type and airline. Book directly on the airline\'s website.',
+      'how.cta':      'Get started →',
+
+      // Destinations modal
+      'dest.eyebrow':  'Explore the world',
+      'dest.title':    'Available destinations',
+      'dest.tab.nat':  '🇧🇷 Brazil',
+      'dest.tab.int':  '🌎 International',
+      'dest.from':     'from',
+
+      // Deals carousel
+      'deals.eyebrow': '✦ Featured deals — click to search',
+
+      // Country names
+      'country.argentina': 'Argentina',
+      'country.portugal':  'Portugal',
+      'country.chile':     'Chile',
+      'country.mexico':    'Mexico',
+      'country.italia':    'Italy',
+      'country.eua':       'USA',
+      'country.espanha':   'Spain',
+      'country.colombia':  'Colombia',
+
+      // Extra tags
+      'tag.europa':   'Europe',
+      'tag.historia': 'History',
     },
 
     es: {
@@ -414,6 +488,43 @@ const I18n = (() => {
       'pwa.dismiss': 'Cerrar',
       'step2.orderBy': 'Ordenar por',
       'step1.select': 'Seleccionar',
+
+      // Cómo funciona modal
+      'how.eyebrow':  'Así de simple',
+      'how.title':    'Cómo funciona',
+      'how.s1.title': 'Ingresa tu origen',
+      'how.s1.desc':  'Escribe la ciudad o aeropuerto desde donde saldrás y cuántas personas viajan.',
+      'how.s2.title': 'Define fechas y presupuesto',
+      'how.s2.desc':  'Elige las fechas de ida y vuelta e ingresa el presupuesto total disponible para el viaje.',
+      'how.s3.title': 'Descubre destinos',
+      'how.s3.desc':  'Mostramos todos los destinos que caben en tu bolsillo, con vuelos, clima y valoraciones.',
+      'how.s4.title': 'Compara y reserva',
+      'how.s4.desc':  'Filtra por clima, tipo de viaje y aerolínea. Reserva directo en el sitio de la aerolínea.',
+      'how.cta':      'Empezar ahora →',
+
+      // Destinos modal
+      'dest.eyebrow':  'Explora el mundo',
+      'dest.title':    'Destinos disponibles',
+      'dest.tab.nat':  '🇧🇷 Brasil',
+      'dest.tab.int':  '🌎 Internacional',
+      'dest.from':     'desde',
+
+      // Carrusel de ofertas
+      'deals.eyebrow': '✦ Ofertas destacadas — clic para buscar',
+
+      // Nombres de países
+      'country.argentina': 'Argentina',
+      'country.portugal':  'Portugal',
+      'country.chile':     'Chile',
+      'country.mexico':    'México',
+      'country.italia':    'Italia',
+      'country.eua':       'EE.UU.',
+      'country.espanha':   'España',
+      'country.colombia':  'Colombia',
+
+      // Tags adicionales
+      'tag.europa':   'Europa',
+      'tag.historia': 'Historia',
     },
   };
 

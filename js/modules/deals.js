@@ -7,19 +7,23 @@ const Deals = (() => {
 
   // ── Curated deals ────────────────────────────────────────────────
   const DEALS = [
-    { city: 'Buenos Aires', country: 'Argentina 🇦🇷', tag: 'Cultura',     price: 1490, budget: 2000, iata: 'GRU', days: 7,  img: 'img/buenosaires.jpg' },
-    { city: 'Lisboa',       country: 'Portugal 🇵🇹',  tag: 'Europa',      price: 3200, budget: 4500, iata: 'GRU', days: 10, img: 'img/lisboa.jpg'      },
-    { city: 'Santiago',     country: 'Chile 🇨🇱',     tag: 'Aventura',    price: 1100, budget: 1800, iata: 'GRU', days: 5,  img: 'img/santiago.jpg'    },
-    { city: 'Cancún',       country: 'México 🇲🇽',    tag: 'Praia',       price: 2800, budget: 4000, iata: 'GRU', days: 7,  img: 'img/cancun.jpg'      },
-    { city: 'Roma',         country: 'Itália 🇮🇹',    tag: 'História',    price: 3600, budget: 5000, iata: 'GRU', days: 10, img: 'img/roma.jpg'        },
-    { city: 'Miami',        country: 'EUA 🇺🇸',       tag: 'Compras',     price: 2400, budget: 3500, iata: 'GRU', days: 6,  img: 'img/miami.jpg'       },
-    { city: 'Barcelona',    country: 'Espanha 🇪🇸',   tag: 'Gastronomia', price: 3400, budget: 4800, iata: 'GRU', days: 9,  img: 'img/barcelona.jpg'   },
-    { city: 'Bogotá',       country: 'Colômbia 🇨🇴',  tag: 'Cultura',     price: 1800, budget: 2500, iata: 'GRU', days: 6,  img: 'img/bogota.jpg'      },
+    { city: 'Buenos Aires', countryKey: 'country.argentina', flag: '🇦🇷', tag: 'Cultura',     price: 1490, budget: 2000, iata: 'GRU', days: 7,  img: 'img/buenosaires.jpg' },
+    { city: 'Lisboa',       countryKey: 'country.portugal',  flag: '🇵🇹', tag: 'Europa',      price: 3200, budget: 4500, iata: 'GRU', days: 10, img: 'img/lisboa.jpg'      },
+    { city: 'Santiago',     countryKey: 'country.chile',     flag: '🇨🇱', tag: 'Aventura',    price: 1100, budget: 1800, iata: 'GRU', days: 5,  img: 'img/santiago.jpg'    },
+    { city: 'Cancún',       countryKey: 'country.mexico',    flag: '🇲🇽', tag: 'Praia',       price: 2800, budget: 4000, iata: 'GRU', days: 7,  img: 'img/cancun.jpg'      },
+    { city: 'Roma',         countryKey: 'country.italia',    flag: '🇮🇹', tag: 'História',    price: 3600, budget: 5000, iata: 'GRU', days: 10, img: 'img/roma.jpg'        },
+    { city: 'Miami',        countryKey: 'country.eua',       flag: '🇺🇸', tag: 'Compras',     price: 2400, budget: 3500, iata: 'GRU', days: 6,  img: 'img/miami.jpg'       },
+    { city: 'Barcelona',    countryKey: 'country.espanha',   flag: '🇪🇸', tag: 'Gastronomia', price: 3400, budget: 4800, iata: 'GRU', days: 9,  img: 'img/barcelona.jpg'   },
+    { city: 'Bogotá',       countryKey: 'country.colombia',  flag: '🇨🇴', tag: 'Cultura',     price: 1800, budget: 2500, iata: 'GRU', days: 6,  img: 'img/bogota.jpg'      },
   ];
 
-  // ── Format date as "07 jun" ──────────────────────────────────────
+  // ── Locale map for date formatting ───────────────────────────────
+  const _LOCALES = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' };
+
+  // ── Format date using current language locale ────────────────────
   function _fmtShort(d) {
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+    const locale = _LOCALES[I18n.getLang()] || 'pt-BR';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'short' }).replace('.', '');
   }
 
   // ── Compute departure / return for this deal ─────────────────────
@@ -38,19 +42,23 @@ const Deals = (() => {
     div.className = 'deal-card';
     if (d.img) div.style.backgroundImage = 'url(' + d.img + ')';
 
+    // Translate tag using existing tag.* keys
+    const tagKey = 'tag.' + d.tag.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const tagLabel = I18n.t(tagKey) !== tagKey ? I18n.t(tagKey) : d.tag;
+
     div.innerHTML =
         '<div class="deal-overlay"></div>'
       + '<div class="deal-content">'
         + '<div class="deal-top">'
-          + '<div class="deal-tag">' + d.tag + '</div>'
+          + '<div class="deal-tag">' + tagLabel + '</div>'
         + '</div>'
         + '<div class="deal-mid">'
           + '<div class="deal-city">' + d.city + '</div>'
-          + '<div class="deal-country">' + d.country + '</div>'
+          + '<div class="deal-country">' + d.flag + ' ' + I18n.t(d.countryKey) + '</div>'
         + '</div>'
         + '<div class="deal-bot">'
           + '<div class="deal-dates">' + dateStr + '</div>'
-          + '<div class="deal-price">a partir de <strong>' + Currency.format(d.price) + '</strong></div>'
+          + '<div class="deal-price">' + I18n.t('dest.from') + ' <strong>' + Currency.format(d.price) + '</strong></div>'
         + '</div>'
       + '</div>';
 
@@ -142,3 +150,6 @@ if (document.readyState === 'loading') {
 } else {
   Deals.render();
 }
+
+// Re-render carousel when language changes
+document.addEventListener('langchange', () => Deals.render());

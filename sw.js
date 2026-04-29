@@ -3,7 +3,7 @@
  * Enables PWA install, offline fallback, and asset caching.
  */
 
-const CACHE_NAME = 'vsd-v12';
+const CACHE_NAME = 'vsd-v16';
 const CACHE_URLS = [
   '/',
   '/index.html',
@@ -31,6 +31,7 @@ const CACHE_URLS = [
   '/js/modules/planes.js',
   '/js/modules/i18n.js',
   '/js/modules/deals.js',
+  '/js/modules/nav.js',
 ];
 
 // ── Install: cache all static assets ──
