@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Viajar sem Destino</title>
+  <meta name="description" content="Descubra destinos dentro do seu budget. Informe datas, pessoas e orçamento."/>
+  <meta name="theme-color" content="#c9622f"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="VsD"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/layout.css"/>
+  <link rel="stylesheet" href="css/forms.css"/>
+  <link rel="stylesheet" href="css/calendar.css"/>
+  <link rel="stylesheet" href="css/results.css"/>
+  <link rel="stylesheet" href="css/modals.css"/>
+</head>
+<body>
+
+<!-- Backgrounds -->
+<div class="bg"></div>
+<div class="bg-grid"></div>
+<div class="noise"></div>
+<div class="ftags" id="ftags"></div>
+<canvas id="planesCanvas" aria-hidden="true"></canvas>
+
+<div class="page">
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="logo">
+      <span class="logo-main">Viajar sem Destino <span class="logo-sub-inline">— O melhor destino está aqui</span></span>
+    </div>
+    <nav>
+      <a href="#" data-i18n="nav.how">Como funciona</a>
+      <a href="#" data-i18n="nav.destinations">Destinos</a>
+      <a href="#" class="nav-cta" data-i18n="nav.enter">Entrar</a>
+    </nav>
+  </header>
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="r-eyebrow-bar" id="discBar" style="display:none">Suas descobertas</div>
+    <div class="eyebrow" data-i18n="hero.eyebrow">Descubra onde ir</div>
+    <h1><span data-i18n="hero.h1">Você decide quando.</span><br><em data-i18n="hero.h1.em">A gente descobre onde.</em></h1>
+    <p class="subtitle" data-i18n="hero.subtitle">Informe seu budget, datas e quantas pessoas viajam.</p>
+
+    <div class="progress">
+      <div class="dot active" id="dot1"></div>
+      <div class="dot" id="dot2"></div>
+    </div>
+    <div class="results-eyebrow" data-i18n="results.eyebrow">Descobertas para você</div>
+
+    <!-- ════════════════════════════════════════
+         PASSO 1 — Formulário de busca
+    ════════════════════════════════════════ -->
+    <div class="card" id="step1">
+      <!-- Row 1: Origem + Viajantes -->
+      <div class="s1-r1">
+        <div class="field">
+          <label class="lbl" data-i18n="step1.origin">Saindo de</label>
+          <div class="ac-wrap" id="acWrap">
+            <input type="text" id="origem" placeholder="Cidade ou sigla (ex: GRU)" data-i18n-ph="step1.origin.ph" autocomplete="off"/>
+            <button class="geo-btn" id="geoBtn" title="Usar minha localização">📍</button>
+            <div class="ac-drop" id="acDrop" style="display:none"></div>
+          </div>
+          <div class="geo-hint" id="geoHint" style="display:none"></div>
+        </div>
+        <div class="field">
+          <label class="lbl" data-i18n="step1.people">Pessoas</label>
+          <input type="number" id="pessoas" min="1" max="20" value="2" style="text-align:center"/>
+        </div>
+      </div>
+
+      <!-- Row 2: Datas -->
+      <div style="margin-bottom:12px">
+        <label class="lbl" data-i18n="step1.dates">Datas</label>
+        <div class="date-fields" id="dateFields">
+          <div class="df-half" id="dfIda">
+            <span class="df-lbl" data-i18n="step1.ida">Ida</span>
+            <span class="df-val placeholder" id="dfIdaVal" data-i18n="step1.select">Selecione</span>
+          </div>
+          <div class="df-half" id="dfVolta">
+            <span class="df-lbl" data-i18n="step1.volta">Volta</span>
+            <span class="df-val placeholder" id="dfVoltaVal" data-i18n="step1.optional">Opcional</span>
+            <button class="df-clear" id="dfClear" title="Remover volta">✕</button>
+          </div>
+        </div>
+        <label class="ow-label" style="margin-top:7px">
+          <input type="checkbox" id="soIda"/>
+          <span data-i18n="step1.oneway">Somente ida — sem data de retorno</span>
+        </label>
+      </div>
+
+      <!-- Row 3: Budget + Destino -->
+      <div style="margin-top:-.25rem"></div>
+      <div class="s1-r3">
+        <div class="field">
+          <label class="lbl" data-i18n="step1.budget">Budget total</label>
+          <div class="brow">
+            <select class="msel" id="moeda">
+              <option value="BRL">R$</option>
+              <option value="USD">US$</option>
+              <option value="EUR">€</option>
+            </select>
+            <input type="text" id="budget" placeholder="15.000" inputmode="numeric"/>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl" data-i18n="step1.dest">Destino</label>
+          <select id="destType">
+            <option value="todos" data-i18n="step1.dest.any">Qualquer lugar</option>
+            <option value="nacional" data-i18n="step1.dest.nat">Só Brasil</option>
+            <option value="internacional" data-i18n="step1.dest.int">Só internacional</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cta-row">
+        <button class="btn-p" id="btnBuscar" data-i18n="step1.search">Buscar destinos →</button>
+        <button class="btn-s" id="btnSurpresa" data-i18n="step1.surprise">✦ Surpresa</button>
+      </div>
+    </div><!-- /step1 -->
+
+    <!-- ════════════════════════════════════════
+         PASSO 2 — Resultados + Filtros
+    ════════════════════════════════════════ -->
+    <div class="card results-card" id="step2" style="display:none">
+
+      <!-- Top bar -->
+      <div class="r-topbar">
+        <div class="r-topbar-head">
+          <div class="r-head">
+            <div class="r-title"><span data-i18n="found.pre">Encontramos</span> <span id="numR">0</span> <span data-i18n="found.post">destinos</span></div>
+            <div class="r-meta" id="rMeta"></div>
+          </div>
+          <button class="btn-nova-busca" id="btnNovaSearch" data-i18n="step2.newSearch">← Nova busca</button>
+        </div>
+        <div class="r-controls">
+          <div class="r-ctrl-group">
+            <label class="sort-lbl" data-i18n="step2.orderBy">Ordenar por</label>
+            <select class="sort-sel" id="sortSel">
+              <option value="preco-asc" data-i18n="step2.priceAsc">↑ Menor preço</option>
+              <option value="preco-desc" data-i18n="step2.priceDesc">↓ Maior preço</option>
+              <option value="sugestao" data-i18n="step2.suggest">✦ Nossa sugestão</option>
+              <option value="az" data-i18n="step2.az">A → Z</option>
+            </select>
+          </div>
+          <div class="r-ctrl-divider"></div>
+          <div class="r-ctrl-group">
+            <button class="vb active" id="vbL" data-i18n="step2.list">☰ Lista</button>
+            <button class="vb" id="vbM" data-i18n="step2.map">🗺 Mapa</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter bar: esquerda (Clima + Tipo) | divisória | direita (Cia Aérea) -->
+      <div class="fbar">
+
+        <!-- Bloco esquerdo: 2 linhas -->
+        <div class="fbar-left">
+          <!-- Linha 1: Clima -->
+          <div class="fbar-row1">
+            <div class="fbar-group">
+              <div class="fbar-label"><span data-i18n="filter.climate">Clima</span> <span class="fbar-hint" data-i18n="filter.one">(um)</span></div>
+              <div class="chips" id="climaChips">
+                <div class="chip" data-group="clima" data-val="calor" data-i18n="clima.calor">☀️ Calor</div>
+                <div class="chip" data-group="clima" data-val="frio" data-i18n="clima.frio">❄️ Frio</div>
+                <div class="chip" data-group="clima" data-val="praia" data-i18n="clima.praia">🏖️ Praia</div>
+                <div class="chip" data-group="clima" data-val="montanha" data-i18n="clima.montanha">⛰️ Serra</div>
+                <div class="chip" data-group="clima" data-val="temperado" data-i18n="clima.temperado">🍂 Temp.</div>
+              </div>
+            </div>
+          </div>
+          <!-- Linha 2: Tipo de viagem + voo combinado -->
+          <div class="fbar-row2">
+            <div class="fbar-group fbar-tipo">
+              <div class="fbar-label"><span data-i18n="filter.tipo">Tipo de viagem</span> <span class="fbar-hint" data-i18n="filter.multi">(múltiplo)</span></div>
+              <div class="chips" id="tipoChips">
+                <div class="chip" data-group="tipo" data-val="gastronomia" data-i18n="tipo.gastro">🍽️ Gastronomia</div>
+                <div class="chip" data-group="tipo" data-val="cultura" data-i18n="tipo.cultura">🏛️ Cultura</div>
+                <div class="chip" data-group="tipo" data-val="aventura" data-i18n="tipo.aventura">🧗 Aventura</div>
+                <div class="chip" data-group="tipo" data-val="relaxar" data-i18n="tipo.relaxar">🧘 Relaxar</div>
+                <div class="chip" data-group="tipo" data-val="familia" data-i18n="tipo.familia">👨‍👩‍👧 Família</div>
+                <div class="chip" data-group="tipo" data-val="romantica" data-i18n="tipo.romantica">💑 Romântica</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divisória vertical — abrange as 2 linhas -->
+        <div class="fbar-vsep"></div>
+
+        <!-- Bloco direito: Cia Aérea + Voo combinado + botão limpar -->
+        <div class="fbar-cia-group">
+          <div class="fbar-label" data-i18n="filter.airline">Cia Aérea</div>
+          <select class="cia-sel" id="ciaP">
+            <option value="">Qualquer</option>
+            <option value="Latam">LATAM</option>
+            <option value="Gol">GOL</option>
+            <option value="Azul">Azul</option>
+            <option value="TAP">TAP</option>
+            <option value="American">American</option>
+            <option value="Avianca">Avianca</option>
+            <option value="Copa Airlines">Copa</option>
+          </select>
+          <label class="ckl fbar-combo"><input type="checkbox" id="mesmaCia"/> <span data-i18n="filter.combo">Voo combinado</span></label>
+          <button class="fbar-clear" id="fbarClear" style="display:none">✕ Limpar</button>
+        </div>
+
+      </div>
+
+      <div id="detP"></div>
+      <div id="mapBox"></div>
+      <div class="dgrid" id="dgrid"></div>
+
+      <div class="cta-row" style="margin-top:4px">
+        <button class="btn-o" id="btnShare" data-i18n="share.btn">📤 Compartilhar</button>
+      </div>
+    </div><!-- /step2 -->
+
+  </div><!-- /hero -->
+
+  <!-- Deals carousel -->
+  <div class="deals-section" id="dealsSection">
+    <div class="deals-eyebrow">✦ Ofertas em destaque — clique para buscar</div>
+    <div class="deals-viewport">
+      <div class="deals-track" id="dealsTrack"></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="sn">180+</div><div class="sl2" data-i18n="stats.dest">Destinos</div></div>
+    <div class="stat"><div class="sn">50+</div><div class="sl2" data-i18n="stats.cias">Companhias</div></div>
+    <div class="stat"><div class="sn">100%</div><div class="sl2" data-i18n="stats.routes">Rotas reais</div></div>
+  </div>
+
+  <!-- Language selector — inside page flow -->
+  <div class="lang-footer">
+    <div class="lang-bar" id="langBar">
+      <button class="lang-btn active" data-lang="pt" onclick="I18n.setLang('pt')">🇧🇷 PT</button>
+      <button class="lang-btn" data-lang="en" onclick="I18n.setLang('en')">🇺🇸 EN</button>
+      <button class="lang-btn" data-lang="es" onclick="I18n.setLang('es')">🇪🇸 ES</button>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- ── Calendar overlay ── -->
+<div class="cal-overlay" id="calOverlay">
+  <div class="cal-backdrop"></div>
+  <div class="cal-popup" id="calPopup">
+    <div class="cal-header">
+      <button class="cal-nav" id="calPrev">‹</button>
+      <div class="cal-month-label" id="calLabel"></div>
+      <button class="cal-nav" id="calNext">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-hint" id="calHint">Selecione a data de ida</div>
+  </div>
+</div>
+
+<!-- ── Share modal ── -->
+<div class="share-modal" id="shareModal">
+  <div class="share-box">
+    <button class="share-close" id="shareModalClose">✕</button>
+    <div class="share-title" data-i18n="share.title">Compartilhar pesquisa</div>
+    <div class="share-sub">
+      Envie sua busca — o link abrirá com todos os dados já preenchidos.<br>
+      ⚠️ Preços sujeitos a alteração pelas companhias aéreas.
+    </div>
+    <div class="share-btns">
+      <a class="share-wa" id="shareWaLink" href="#" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.025.507 3.933 1.395 5.61L0 24l6.545-1.371A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.372l-.36-.214-3.724.977.997-3.645-.235-.374A9.818 9.818 0 1112 21.818z"/>
+        </svg>
+        WhatsApp
+      </a>
+      <a class="share-email" id="shareEmailLink" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,12 2,6"/>
+        </svg>
+        E-mail
+      </a>
+    </div>
+    <div class="share-url-row">
+      <input type="text" id="shareURLInput" readonly placeholder="Link da pesquisa"/>
+      <button id="shareCopyBtn" data-i18n="share.copy">Copiar link</button>
+    </div>
+    <div class="share-disclaimer">
+      Os preços exibidos são estimativas baseadas em rotas reais e podem variar.
+      Sempre confirme o valor final diretamente no site da companhia aérea.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     JavaScript — data, modules, app
+════════════════════════════════════════ -->
+
+<!-- lang-bar moved to page footer -->
+
+<!-- PWA install prompt -->
+<div class="pwa-banner" id="pwaBanner" style="display:none">
+  <button class="pwa-install-btn" id="pwaInstallBtn" data-i18n="pwa.install">📲 Instalar app</button>
+  <button class="pwa-dismiss" id="pwaDismiss" data-i18n="pwa.dismiss">✕</button>
+</div>
+
+<!-- Data -->
+<script src="js/state.js"></script>
+<script src="js/data/airports.js"></script>
+<script src="js/data/destinations.js"></script>
+<script src="js/data/coordinates.js"></script>
+
+<!-- i18n must load before everything -->
+<script src="js/modules/i18n.js"></script>
+
+<!-- Modules (order matters — dependencies first) -->
+<script src="js/modules/currency.js"></script>
+<script src="js/modules/calendar.js"></script>
+<script src="js/modules/autocomplete.js"></script>
+<script src="js/modules/weather.js"></script>
+<script src="js/modules/flights.js"></script>
+<script src="js/modules/search.js"></script>
+<script src="js/modules/empty-state.js"></script>
+<script src="js/modules/cards.js"></script>
+<script src="js/modules/deals.js"></script>
+<script src="js/modules/map.js"></script>
+<script src="js/modules/share.js"></script>
+
+<!-- Floating tags (self-contained, no deps) -->
+<script>
+(function(){
+  const TAGS = ['Tóquio','Lisboa','Nova York','Buenos Aires','Paris','Cancún','Bangkok',
+                'Amsterdã','Roma','Sydney','Cidade do Cabo','Kyoto','Havana','Barcelona',
+                'Reykjavik','Santorini','Miami','Praga','Vancouver','Florianópolis','Santiago'];
+  for (let i = 0; i < 14; i++) {
+    const el = document.createElement('div');
+    el.className = 'ftag';
+    el.textContent = TAGS[i % TAGS.length];
+    el.style.cssText = 'left:' + Math.random()*100 + '%;top:' + (25+Math.random()*60) + '%;'
+      + 'animation-duration:' + (20+Math.random()*16) + 's;'
+      + 'animation-delay:-' + Math.random()*20 + 's';
+    document.getElementById('ftags').appendChild(el);
+  }
+})();
+</script>
+
+<!-- Planes background animation -->
+<script src="js/modules/planes.js"></script>
+
+<!-- App orchestrator (must be last) -->
+<script src="js/app.js"></script>
+
+<script>
+// ── Service Worker registration ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.info('[SW] Registered:', r.scope))
+      .catch(e => console.warn('[SW] Failed:', e));
+  });
+}
+
+// ── PWA install prompt ──
+let _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredPrompt = e;
+  document.getElementById('pwaBanner').style.display = 'flex';
+});
+document.getElementById('pwaInstallBtn').addEventListener('click', () => {
+  if (!_deferredPrompt) return;
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(() => {
+    _deferredPrompt = null;
+    document.getElementById('pwaBanner').style.display = 'none';
+  });
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwaBanner').style.display = 'none';
+});
+
+// ── i18n: highlight active lang button ──
+document.addEventListener('langchange', e => {
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === e.detail.lang);
+  });
+  // Re-render sort select options
+  document.querySelectorAll('#sortSel option[data-i18n]').forEach(opt => {
+    opt.textContent = I18n.t(opt.dataset.i18n);
+  });
+});
+</script>
+</body>
+</html>

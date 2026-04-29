@@ -1,0 +1,259 @@
+/* css/forms.css — Formulário, inputs, chips, botões
+   ─────────────────────────────────────────────── */
+
+/* ── Labels ── */
+label.lbl {
+  font-size: var(--tx-xs); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mut);
+  font-weight: 500; display: block; margin-bottom: .4375rem;
+}
+
+/* ── Base inputs / selects ── */
+input, select {
+  background: var(--gb);
+  border: 1px solid var(--gbr);
+  border-radius: var(--radius-md);
+  color: var(--sand);
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--tx-base);
+  padding: .75rem .875rem;
+  min-height: var(--touch);   /* toque mínimo */
+  outline: none; width: 100%;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+  -webkit-appearance: none; appearance: none;
+}
+input:focus, select:focus {
+  border-color: var(--accl);
+  background: rgba(255,255,255,.08);
+}
+select option { background: #1a120b; color: var(--sand); }
+
+/* ── Step 1 grid rows ── */
+.s1-r1 {
+  display: grid;
+  grid-template-columns: 2.2fr 0.8fr;
+  gap: .625rem;
+  margin-bottom: .625rem;
+}
+.s1-r3 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: .625rem;
+  margin-top: .25rem;
+  margin-bottom: .625rem;
+}
+.field { display: flex; flex-direction: column; }
+
+/* ── Budget input row ── */
+.brow { display: flex; }
+.msel {
+  background: rgba(255,255,255,.09);
+  border: 1px solid var(--gbr); border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  color: var(--accl);
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--tx-sm); font-weight: 600;
+  padding: .75rem .5rem .75rem .8125rem;
+  min-height: var(--touch);
+  outline: none; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  width: 62px; flex-shrink: 0;
+  letter-spacing: .04em;
+  transition: border-color var(--dur) var(--ease);
+}
+.msel:focus { border-color: var(--accl); }
+.brow input  { border-radius: 0 var(--radius-md) var(--radius-md) 0; flex: 1; min-width: 0; }
+
+/* ── Date fields ── */
+.date-fields {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--gbr);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease);
+}
+.date-fields:focus-within { border-color: var(--accl); }
+.df-half { position: relative; background: var(--gb); min-height: var(--touch); }
+.df-half:first-child { border-right: 1px solid var(--gbr); }
+.df-half:hover { background: rgba(255,255,255,.08); }
+.df-lbl {
+  font-size: var(--tx-xs); letter-spacing: .15em;
+  text-transform: uppercase; color: var(--mut);
+  padding: .625rem .875rem .1875rem; display: block;
+}
+.df-val {
+  font-size: var(--tx-base); color: var(--sand);
+  padding: 0 .875rem .625rem; display: block; min-height: 1.375rem;
+}
+.df-val.placeholder { color: rgba(138,127,118,.5); }
+.df-clear {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--mut);
+  cursor: pointer; font-size: .9rem; padding: .1875rem;
+  display: none; min-width: var(--touch); min-height: var(--touch);
+  align-items: center; justify-content: center;
+  transition: color var(--dur) var(--ease);
+}
+.df-clear:hover { color: var(--sand); }
+
+.ow-label {
+  font-size: var(--tx-sm); color: var(--mut);
+  padding: .25rem .875rem;
+  display: flex; align-items: center; gap: .375rem;
+  cursor: pointer; user-select: none;
+  min-height: var(--touch);
+}
+.ow-label input[type=checkbox] {
+  width: 16px; height: 16px;
+  accent-color: var(--acc);
+  cursor: pointer; flex-shrink: 0;
+  appearance: auto; -webkit-appearance: auto;
+}
+
+/* ── Autocomplete ── */
+.ac-wrap { position: relative; }
+.ac-wrap input { padding-right: 2.5rem; }
+.geo-btn {
+  position: absolute; right: .5rem; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  font-size: .95rem; color: var(--mut);
+  min-width: var(--touch); min-height: var(--touch);
+  display: flex; align-items: center; justify-content: center;
+  transition: color var(--dur) var(--ease);
+}
+.geo-btn:hover { color: var(--accl); }
+.geo-btn.spin { animation: gspin 1s linear infinite; }
+
+.ac-drop {
+  position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+  background: #1c140e; border: 1px solid var(--gbr);
+  border-radius: var(--radius-md); z-index: 500;
+  overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,.5);
+  max-height: 220px; overflow-y: auto;
+}
+.ac-item {
+  padding: .625rem .8125rem; cursor: pointer;
+  display: flex; align-items: center; gap: .625rem;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  transition: background .13s var(--ease);
+  min-height: var(--touch);
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover, .ac-item.hi { background: rgba(201,98,47,.13); }
+.ac-code {
+  font-size: var(--tx-xs); font-weight: 700; letter-spacing: .1em;
+  color: var(--accl); background: rgba(201,98,47,.13);
+  padding: .125rem .4375rem; border-radius: 5px;
+  min-width: 34px; text-align: center; flex-shrink: 0;
+}
+.ac-city  { font-size: var(--tx-sm); color: var(--sand); font-weight: 500; }
+.ac-apt   { font-size: var(--tx-xs); color: var(--mut); }
+.geo-hint { font-size: var(--tx-xs); color: var(--mut); margin-top: .3125rem; opacity: .6; }
+
+/* ── Chips ── */
+.chips { display: flex; flex-wrap: wrap; gap: .4375rem; }
+.chip {
+  padding: .5rem .8125rem;
+  border-radius: 40px; cursor: pointer;
+  font-size: var(--tx-sm);
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04); color: var(--mut);
+  transition: all var(--dur) var(--ease);
+  user-select: none; display: flex; align-items: center; gap: .3125rem;
+  white-space: nowrap;
+  min-height: var(--touch);
+}
+.chip:hover  { border-color: rgba(255,255,255,.2); color: var(--sand); }
+.chip.active { border-color: var(--acc); background: rgba(201,98,47,.15); color: var(--sand); }
+
+/* ── Companhia aérea row ── */
+.cia-line { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.cia-sel {
+  background: var(--gb); border: 1px solid var(--gbr);
+  border-radius: var(--radius-sm); color: var(--mut);
+  font-family: 'DM Sans', sans-serif; font-size: var(--tx-sm);
+  padding: .5rem .6875rem; min-height: var(--touch);
+  outline: none; appearance: none; -webkit-appearance: none;
+  cursor: pointer; transition: border-color var(--dur) var(--ease);
+  width: 110px; min-width: 0; max-width: 110px;
+}
+.cia-sel:focus { border-color: var(--accl); color: var(--sand); }
+.ckl {
+  display: flex; align-items: center; gap: .375rem;
+  cursor: pointer; font-size: var(--tx-sm); color: var(--mut);
+  white-space: nowrap; min-height: var(--touch);
+}
+.ckl input[type=checkbox] {
+  width: 16px; height: 16px;
+  accent-color: var(--acc); cursor: pointer; flex-shrink: 0;
+  appearance: auto; -webkit-appearance: auto;
+}
+
+/* ── Buttons ── */
+.cta-row { display: flex; gap: .625rem; margin-top: var(--sp-4); align-items: center; }
+
+.btn-p {
+  flex: 1; padding: .9375rem 1.5rem;
+  background: var(--acc); border: none;
+  border-radius: var(--radius-md); cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--tx-base); font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: #fff; min-height: var(--touch);
+  transition: background var(--dur) var(--ease), transform .15s, box-shadow var(--dur);
+  box-shadow: 0 7px 26px rgba(201,98,47,.3);
+  position: relative; overflow: hidden;
+}
+.btn-p::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.13) 0%, transparent 55%);
+  pointer-events: none;
+}
+.btn-p:hover  { background: var(--accl); transform: translateY(-2px); box-shadow: 0 11px 32px rgba(201,98,47,.4); }
+.btn-p:active { transform: none; }
+
+.btn-s {
+  padding: .9375rem 1.25rem;
+  border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius-md);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: var(--tx-sm); color: var(--mut);
+  background: transparent; min-height: var(--touch);
+  transition: all var(--dur) var(--ease); white-space: nowrap;
+}
+.btn-s:hover { color: var(--sand); border-color: rgba(255,255,255,.2); }
+
+.btn-o {
+  padding: .5625rem 1rem;
+  border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius-sm);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: var(--tx-sm); color: var(--mut);
+  background: transparent; min-height: var(--touch);
+  transition: all var(--dur) var(--ease);
+}
+.btn-o:hover { color: var(--sand); border-color: var(--accl); }
+
+/* ── Responsive forms ── */
+@media (max-width: 600px) {
+  /* Origem em linha cheia, pax ao lado das datas */
+  .s1-r1 { grid-template-columns: 1fr 0.7fr; gap: var(--sp-2); }
+  .s1-r1 > .field:first-child { grid-column: 1 / -1; }
+
+  /* Budget em linha cheia, destino abaixo */
+  .s1-r3 { grid-template-columns: 1fr; gap: var(--sp-2); }
+
+  /* Datas em coluna */
+  .date-fields { grid-template-columns: 1fr; }
+  .df-half:first-child { border-right: none; border-bottom: 1px solid var(--gbr); }
+
+  /* CTA em coluna */
+  .cta-row { flex-direction: column; }
+  .btn-s, .btn-p { width: 100%; text-align: center; }
+
+  /* Chips menores mas ainda tocáveis */
+  .chip { font-size: var(--tx-xs); padding: .5rem .75rem; min-height: 38px; }
+}
+
+@media (max-width: 360px) {
+  .s1-r1 { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#0d1117"/>
+  <rect width="512" height="512" rx="80" fill="url(#g)"/>
+  <defs>
+    <radialGradient id="g" cx="70%" cy="20%">
+      <stop offset="0%" stop-color="#c9622f" stop-opacity=".4"/>
+      <stop offset="100%" stop-color="#0d1117" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Plane icon -->
+  <text x="256" y="300" font-size="200" text-anchor="middle" fill="#f5efe6">✈</text>
+  <!-- V letter accent -->
+  <text x="256" y="420" font-size="72" text-anchor="middle" 
+        font-family="Georgia,serif" font-style="italic" fill="#c9622f" opacity=".9">VsD</text>
+</svg>
