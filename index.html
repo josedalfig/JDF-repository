@@ -45,11 +45,80 @@
       <span class="logo-main">Viajar sem Destino <span class="logo-sub-inline">— O melhor destino está aqui</span></span>
     </div>
     <nav>
-      <a href="#" data-i18n="nav.how">Como funciona</a>
-      <a href="#" data-i18n="nav.destinations">Destinos</a>
+      <a href="#" id="navHow" data-i18n="nav.how">Como funciona</a>
+      <a href="#" id="navDest" data-i18n="nav.destinations">Destinos</a>
       <a href="#" class="nav-cta" data-i18n="nav.enter">Entrar</a>
     </nav>
+    <!-- Hamburger — mobile only -->
+    <button class="hamburger" id="hamBtn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </header>
+
+  <!-- ── Mobile menu drawer ── -->
+  <div class="mob-backdrop" id="mobBackdrop"></div>
+  <div class="mob-menu" id="mobMenu">
+    <button class="mob-close" id="mobClose">✕</button>
+    <nav class="mob-nav">
+      <a href="#" id="mobNavHow" data-i18n="nav.how">Como funciona</a>
+      <a href="#" id="mobNavDest" data-i18n="nav.destinations">Destinos</a>
+      <a href="#" class="mob-cta" data-i18n="nav.enter">Entrar</a>
+    </nav>
+    <div class="mob-footer">
+      <div class="mob-brand">Viajar sem Destino</div>
+      <div class="mob-tagline" data-i18n="hero.eyebrow">Descubra onde ir</div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Como funciona ── -->
+  <div class="info-modal" id="modalHow">
+    <div class="info-modal-box">
+      <button class="info-modal-close" id="modalHowClose">✕</button>
+      <div class="info-modal-eyebrow" data-i18n="how.eyebrow">Simples assim</div>
+      <h2 class="info-modal-title" data-i18n="how.title">Como funciona</h2>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-icon">✈️</div>
+          <div class="how-num">01</div>
+          <div class="how-step-title" data-i18n="how.s1.title">Informe sua origem</div>
+          <div class="how-step-desc" data-i18n="how.s1.desc">Digite a cidade ou aeroporto de onde você vai partir e quantas pessoas viajam.</div>
+        </div>
+        <div class="how-step">
+          <div class="how-icon">💰</div>
+          <div class="how-num">02</div>
+          <div class="how-step-title" data-i18n="how.s2.title">Defina datas e budget</div>
+          <div class="how-step-desc" data-i18n="how.s2.desc">Escolha as datas de ida e volta e informe o orçamento total disponível para a viagem.</div>
+        </div>
+        <div class="how-step">
+          <div class="how-icon">🌍</div>
+          <div class="how-num">03</div>
+          <div class="how-step-title" data-i18n="how.s3.title">Descubra destinos</div>
+          <div class="how-step-desc" data-i18n="how.s3.desc">Mostramos todos os destinos que cabem no seu bolso, com voos, clima e avaliações.</div>
+        </div>
+        <div class="how-step">
+          <div class="how-icon">🎯</div>
+          <div class="how-num">04</div>
+          <div class="how-step-title" data-i18n="how.s4.title">Compare e reserve</div>
+          <div class="how-step-desc" data-i18n="how.s4.desc">Filtre por clima, tipo de viagem e companhia aérea. Reserve direto no site da cia.</div>
+        </div>
+      </div>
+      <button class="how-cta-btn" id="modalHowCta" data-i18n="how.cta">Começar agora →</button>
+    </div>
+  </div>
+
+  <!-- ── Modal: Destinos ── -->
+  <div class="info-modal" id="modalDest">
+    <div class="info-modal-box info-modal-box--wide">
+      <button class="info-modal-close" id="modalDestClose">✕</button>
+      <div class="info-modal-eyebrow" data-i18n="dest.eyebrow">Explore o mundo</div>
+      <h2 class="info-modal-title" data-i18n="dest.title">Destinos disponíveis</h2>
+      <div class="dest-tabs">
+        <button class="dest-tab active" data-tab="nacional" data-i18n="dest.tab.nat">🇧🇷 Brasil</button>
+        <button class="dest-tab" data-tab="internacional" data-i18n="dest.tab.int">🌎 Internacional</button>
+      </div>
+      <div id="destGrid" class="dest-grid"></div>
+    </div>
+  </div>
 
   <!-- ── Hero ── -->
   <div class="hero">
@@ -236,7 +305,7 @@
 
   <!-- Deals carousel -->
   <div class="deals-section" id="dealsSection">
-    <div class="deals-eyebrow">✦ Ofertas em destaque — clique para buscar</div>
+    <div class="deals-eyebrow" data-i18n="deals.eyebrow">✦ Ofertas em destaque — clique para buscar</div>
     <div class="deals-viewport">
       <div class="deals-track" id="dealsTrack"></div>
     </div>
@@ -272,6 +341,14 @@
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-hint" id="calHint">Selecione a data de ida</div>
   </div>
+</div>
+
+<!-- ── Compare floating bar ── -->
+<div class="cmp-bar" id="cmpBar"></div>
+
+<!-- ── Compare modal ── -->
+<div class="info-modal" id="cmpModal">
+  <div class="cmp-modal-box"></div>
 </div>
 
 <!-- ── Share modal ── -->
@@ -340,7 +417,9 @@
 <script src="js/modules/search.js"></script>
 <script src="js/modules/empty-state.js"></script>
 <script src="js/modules/cards.js"></script>
+<script src="js/modules/compare.js"></script>
 <script src="js/modules/deals.js"></script>
+<script src="js/modules/nav.js"></script>
 <script src="js/modules/map.js"></script>
 <script src="js/modules/share.js"></script>
 

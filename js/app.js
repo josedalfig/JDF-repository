@@ -169,6 +169,13 @@ const App = (() => {
 
     // Card click — event delegation (more reliable than inline onclick)
     document.getElementById('dgrid').addEventListener('click', e => {
+      // Compare toggle button
+      const cmpBtn = e.target.closest('.cmp-toggle');
+      if (cmpBtn) {
+        Compare.toggleByIdx(parseInt(cmpBtn.dataset.idx));
+        return;
+      }
+      // Open detail panel
       const card = e.target.closest('.dc[data-idx]');
       if (card) Cards.showDetail(parseInt(card.dataset.idx));
     });

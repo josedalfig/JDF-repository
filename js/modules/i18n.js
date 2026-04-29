@@ -197,6 +197,17 @@ const I18n = (() => {
       // Extra tags
       'tag.europa':   'Europa',
       'tag.historia': 'História',
+
+      // Comparar destinos
+      'cmp.add':       '＋ Comparar',
+      'cmp.added':     'Comparando',
+      'cmp.comparing': 'Comparando',
+      'cmp.compare':   'Ver comparação',
+      'cmp.title':     'Comparar destinos',
+      'cmp.total':     'Total da viagem',
+      'cmp.perpax':    'Por pessoa',
+      'cmp.airline':   'Cia Aérea',
+      'cmp.select':    'Selecionar',
     },
 
     en: {
@@ -361,6 +372,17 @@ const I18n = (() => {
       // Extra tags
       'tag.europa':   'Europe',
       'tag.historia': 'History',
+
+      // Compare destinations
+      'cmp.add':       '＋ Compare',
+      'cmp.added':     'Comparing',
+      'cmp.comparing': 'Comparing',
+      'cmp.compare':   'View comparison',
+      'cmp.title':     'Compare destinations',
+      'cmp.total':     'Trip total',
+      'cmp.perpax':    'Per person',
+      'cmp.airline':   'Airline',
+      'cmp.select':    'Select',
     },
 
     es: {
@@ -525,6 +547,17 @@ const I18n = (() => {
       // Tags adicionales
       'tag.europa':   'Europa',
       'tag.historia': 'Historia',
+
+      // Comparar destinos
+      'cmp.add':       '＋ Comparar',
+      'cmp.added':     'Comparando',
+      'cmp.comparing': 'Comparando',
+      'cmp.compare':   'Ver comparación',
+      'cmp.title':     'Comparar destinos',
+      'cmp.total':     'Total del viaje',
+      'cmp.perpax':    'Por persona',
+      'cmp.airline':   'Aerolínea',
+      'cmp.select':    'Seleccionar',
     },
   };
 

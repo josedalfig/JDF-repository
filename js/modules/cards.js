@@ -56,12 +56,17 @@ const Cards = (() => {
 
       const isBest  = i === 0 && selectedIdx === null;
       const isSel   = selectedIdx !== null && results[selectedIdx] === d;
+      const isCmp   = (typeof Compare !== 'undefined') && Compare.isSelected(d.city);
       const bg      = d.img ? '<div class="dc-bg" style="background-image:url(\'' + d.img + '\')"></div>' : '';
       const tags    = d.tags.map(t => '<span class="dc-tag">' + tTag(t) + '</span>').join('');
+      const cmpBtn  = '<button class="cmp-toggle' + (isCmp ? ' cmp-on' : '') + '" data-idx="' + origIdx + '">'
+        + (isCmp ? '✓ ' + I18n.t('cmp.added') : '+ ' + I18n.t('cmp.add'))
+        + '</button>';
 
-      return '<div class="dc' + (isBest ? ' feat' : '') + (isSel ? ' dc-selected' : '') + '"'
+      return '<div class="dc' + (isBest ? ' feat' : '') + (isSel ? ' dc-selected' : '') + (isCmp ? ' dc-cmp' : '') + '"'
         + ' data-idx="' + origIdx + '">'
         + bg
+        + cmpBtn
         + '<div class="dc-inner">'
           + '<div>'
             + '<div class="dc-badge"><span class="bdot"></span>' + (isBest ? I18n.t('nossa.sug') : tTag(d.tags[0])) + '</div>'
@@ -112,6 +117,7 @@ const Cards = (() => {
 
     // Update state and re-render cards so selected floats up
     AppState.set('selectedIdx', idx);
+    const isCmp = (typeof Compare !== 'undefined') && Compare.isSelected(d.city);
     render();
 
     // Build panel
@@ -149,8 +155,10 @@ const Cards = (() => {
       + '<div id="ftSlot">' + flightRows + '</div>'
       + '<div class="dp-disclaimer">' + I18n.t('detail.disclaimer') + '</div>'
       + '<div class="dp-cta">'
-        + '<button class="btn-book" onclick="Cards.goBook(\'' + d.city + '\',\'' + cias[0] + '\')">Buscar na ' + cias[0] + ' →</button>'
-        + '<button class="btn-o" onclick="Cards.closeDetail()">Ver outros</button>'
+        + '<button class="btn-book" onclick="Cards.goBook(\'' + d.city + '\',\'' + cias[0] + '\')">' + I18n.t('detail.book') + ' ' + cias[0] + ' →</button>'
+        + '<button class="btn-o btn-cmp' + (isCmp ? ' cmp-on' : '') + '" onclick="Compare.toggleByIdx(' + idx + ');Cards.showDetail(' + idx + ')">'
+          + (isCmp ? '✓ ' + I18n.t('cmp.added') : I18n.t('cmp.add'))
+        + '</button>'
       + '</div>'
     + '</div>';
 
