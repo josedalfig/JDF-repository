@@ -39,6 +39,12 @@ const App = (() => {
       document.getElementById('detP').innerHTML = '';
       MapView.reset();
       AppState.resetSearch();
+      // Reset flex UI
+      const flexCheck = document.getElementById('flexDates');
+      if (flexCheck) { flexCheck.checked = false; }
+      document.getElementById('flexSelector').classList.remove('visible');
+      document.querySelectorAll('.flex-btn').forEach(b => b.classList.remove('active'));
+      AppState.set('flexDays', null);
     }
   }
 
@@ -154,6 +160,27 @@ const App = (() => {
         chip.classList.toggle('active');
         const active = Array.from(document.querySelectorAll('#tipoChips .chip.active')).map(c => c.dataset.val);
         AppState.set('tipoFilters', active);
+        if (document.getElementById('step2').style.display !== 'none') runSearch();
+      });
+    });
+
+    // Flex dates checkbox
+    document.getElementById('flexDates').addEventListener('change', e => {
+      const on = e.target.checked;
+      document.getElementById('flexSelector').classList.toggle('visible', on);
+      if (!on) {
+        AppState.set('flexDays', null);
+        document.querySelectorAll('.flex-btn').forEach(b => b.classList.remove('active'));
+        if (document.getElementById('step2').style.display !== 'none') runSearch();
+      }
+    });
+
+    // Flex day buttons
+    document.querySelectorAll('.flex-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.flex-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        AppState.set('flexDays', parseInt(btn.dataset.days));
         if (document.getElementById('step2').style.display !== 'none') runSearch();
       });
     });

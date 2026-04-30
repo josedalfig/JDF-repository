@@ -18,6 +18,7 @@ const AppState = (() => {
     // Dates
     idaDate:      null,   // Date object
     voltaDate:    null,   // Date object | null
+    flexDays:     null,   // null | 3 | 5 | 7
 
     // Filters (step 2)
     climaFilter:  null,   // single string | null

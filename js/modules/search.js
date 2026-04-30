@@ -5,6 +5,62 @@
 
 const Search = (() => {
 
+  // ── Flexible date search ─────────────────────────────────────────
+  // For each destination, find the cheapest departure day within the window.
+  // Price varies by day-of-week (weekends cost more) + small city/date jitter.
+  // Returns results already budget-filtered, with .flexBestDate and .flexSaving.
+  function _flexDates(pool, budget, passengers, idaDate, flexDays) {
+    const bpp = budget / passengers;
+
+    // Apply non-price filters first (climate, trip type, airline)
+    const climaFilter   = AppState.get('climaFilter');
+    const tipoFilters   = AppState.get('tipoFilters');
+    const airlineFilter = AppState.get('airlineFilter');
+    const filtered = pool.filter(d => {
+      if (climaFilter   && !d.clima.includes(climaFilter))                      return false;
+      if (tipoFilters.length && !tipoFilters.some(t => d.tipo.includes(t)))     return false;
+      if (airlineFilter && !d.airlines.includes(airlineFilter))                  return false;
+      return true;
+    });
+
+    // Build date window: [ida, ida+1, ..., ida+(flexDays-1)]
+    const dates = [];
+    for (let i = 0; i < flexDays; i++) {
+      const d = new Date(idaDate);
+      d.setDate(d.getDate() + i);
+      dates.push(d);
+    }
+
+    // Day-of-week multipliers (0=Sun … 6=Sat)
+    // Mon/Tue/Wed cheapest; Fri/Sat/Sun pricier
+    const DOW = [1.07, 0.91, 0.88, 0.90, 0.96, 1.05, 1.09];
+
+    const results = [];
+    for (const dest of filtered) {
+      let bestPrice = Infinity;
+      let bestDate  = idaDate;
+
+      for (const date of dates) {
+        // Deterministic jitter per city+day (±4 %)
+        const seed    = (dest.city.charCodeAt(0) * 31 + date.getDate()) % 20;
+        const jitter  = (seed - 10) * 0.004;
+        const price   = Math.round(dest.price * (DOW[date.getDay()] + jitter));
+        if (price < bestPrice) { bestPrice = price; bestDate = new Date(date); }
+      }
+
+      if (bestPrice <= bpp) {
+        const saving = Math.max(0, dest.price - bestPrice);
+        results.push({
+          ...dest,
+          price:        bestPrice,
+          flexBestDate: bestDate,
+          flexSaving:   saving,
+        });
+      }
+    }
+    return results;
+  }
+
   // ── Core filter ─────────────────────────────────────────────────
   function _buildPool() {
     const destType = document.getElementById('destType').value;
@@ -80,8 +136,17 @@ const Search = (() => {
     }
 
     AppState.set('isLive', isLive);
-    const filtered = _applyFilters(pool, budget, passengers);
-    const sorted   = _applySort(filtered);
+
+    const flexDays = AppState.get('flexDays');
+    let processed;
+    if (flexDays && idaDate && !isLive) {
+      // Flexible-date search on static data
+      processed = _flexDates(pool, budget, passengers, idaDate, flexDays);
+    } else {
+      processed = _applyFilters(pool, budget, passengers);
+    }
+
+    const sorted = _applySort(processed);
 
     AppState.set('results', sorted);
     AppState.set('selectedIdx', null);
@@ -129,12 +194,16 @@ const Search = (() => {
     const fmtD = d => d ? d.toLocaleDateString(locale, { day:'2-digit', month:'long' }) : '';
     const travelerLabel = passengers > 1 ? I18n.t('meta.travelerspl') : I18n.t('meta.travelers');
 
+    const flexDays = AppState.get('flexDays');
+    const flexLabel = flexDays ? ' · ' + I18n.t('flex.meta').replace('{n}', flexDays) : '';
+
     document.getElementById('numR').textContent = results.length;
     document.getElementById('rMeta').textContent =
       orig + ' · ' + fmtD(ida) +
       (!soIda && volta ? ' → ' + fmtD(volta) : ' · ' + I18n.t('meta.oneway')) +
       ' · ' + passengers + ' ' + travelerLabel +
-      ' · ' + I18n.t('meta.until') + ' ' + Currency.format(budget);
+      ' · ' + I18n.t('meta.until') + ' ' + Currency.format(budget) +
+      flexLabel;
   }
 
   return { run, setSort, clearFilters, updateMeta };

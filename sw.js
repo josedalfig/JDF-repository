@@ -3,7 +3,7 @@
  * Enables PWA install, offline fallback, and asset caching.
  */
 
-const CACHE_NAME = 'vsd-v20';
+const CACHE_NAME = 'vsd-v21';
 const CACHE_URLS = [
   '/',
   '/index.html',

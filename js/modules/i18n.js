@@ -198,6 +198,14 @@ const I18n = (() => {
       'tag.europa':   'Europa',
       'tag.historia': 'História',
 
+      // Datas flexíveis
+      'flex.label': 'Datas flexíveis',
+      'flex.d3':    '± 3 dias',
+      'flex.d5':    '± 5 dias',
+      'flex.d7':    '± 7 dias',
+      'flex.best':  'Economia com data flexível',
+      'flex.meta':  'flexível ±{n}d',
+
       // Comparar destinos
       'cmp.add':       '＋ Comparar',
       'cmp.added':     'Comparando',
@@ -373,6 +381,14 @@ const I18n = (() => {
       'tag.europa':   'Europe',
       'tag.historia': 'History',
 
+      // Flexible dates
+      'flex.label': 'Flexible dates',
+      'flex.d3':    '± 3 days',
+      'flex.d5':    '± 5 days',
+      'flex.d7':    '± 7 days',
+      'flex.best':  'Savings with flexible date',
+      'flex.meta':  'flexible ±{n}d',
+
       // Compare destinations
       'cmp.add':       '＋ Compare',
       'cmp.added':     'Comparing',
@@ -547,6 +563,14 @@ const I18n = (() => {
       // Tags adicionales
       'tag.europa':   'Europa',
       'tag.historia': 'Historia',
+
+      // Fechas flexibles
+      'flex.label': 'Fechas flexibles',
+      'flex.d3':    '± 3 días',
+      'flex.d5':    '± 5 días',
+      'flex.d7':    '± 7 días',
+      'flex.best':  'Ahorro con fecha flexible',
+      'flex.meta':  'flexible ±{n}d',
 
       // Comparar destinos
       'cmp.add':       '＋ Comparar',

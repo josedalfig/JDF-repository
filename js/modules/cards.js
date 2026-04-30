@@ -99,7 +99,14 @@ const Cards = (() => {
     const ida        = AppState.get('idaDate');
     const volta      = AppState.get('voltaDate');
 
-    const fmtD = v => v ? v.toLocaleDateString('pt-BR', { day:'2-digit', month:'short' }) : '—';
+    const lang   = I18n.getLang();
+    const locale = lang === 'en' ? 'en-US' : lang === 'es' ? 'es-ES' : 'pt-BR';
+    const fmtD = v => v ? v.toLocaleDateString(locale, { day:'2-digit', month:'short' }) : '—';
+
+    // Flex date: use best date found if different from selected
+    const flexDate    = d.flexBestDate || null;
+    const displayIda  = flexDate || ida;
+    const showFlex    = flexDate && ida && flexDate.toDateString() !== ida.toDateString();
     const cias = ciaFilter && d.airlines.includes(ciaFilter)
       ? [ciaFilter, ...d.airlines.filter(a => a !== ciaFilter)]
       : d.airlines;
@@ -137,7 +144,11 @@ const Cards = (() => {
           + '<div class="dsv dp-total-val">' + Currency.format(d.price * passengers) + '</div>'
           + '<div class="dsl" style="margin-top:3px">' + Currency.format(d.price) + ' por pessoa</div>'
         + '</div>'
-        + '<div class="dst"><div class="dsl">Ida</div><div class="dsv">' + fmtD(ida) + '</div></div>'
+        + '<div class="dst">'
+          + '<div class="dsl">' + I18n.t('detail.ida') + '</div>'
+          + '<div class="dsv">' + fmtD(displayIda) + '</div>'
+          + (showFlex ? '<div class="flex-best-badge">✦ ' + I18n.t('flex.best') + ' · ' + Currency.format(d.flexSaving) + '</div>' : '')
+        + '</div>'
         + (function() {
             if (!volta) {
               const sug = new Date(ida); sug.setDate(sug.getDate() + 7);

@@ -168,7 +168,22 @@
             <button class="df-clear" id="dfClear" title="Remover volta">✕</button>
           </div>
         </div>
-        <label class="ow-label" style="margin-top:7px">
+
+        <!-- Datas flexíveis -->
+        <div class="flex-dates-row" id="flexDatesRow">
+          <label class="ow-label">
+            <input type="checkbox" id="flexDates"/>
+            <span data-i18n="flex.label">Datas flexíveis</span>
+          </label>
+          <div class="flex-selector" id="flexSelector">
+            <button class="flex-btn" data-days="3" data-i18n="flex.d3">± 3 dias</button>
+            <button class="flex-btn" data-days="5" data-i18n="flex.d5">± 5 dias</button>
+            <button class="flex-btn" data-days="7" data-i18n="flex.d7">± 7 dias</button>
+          </div>
+        </div>
+
+        <!-- Somente ida (abaixo das opções de data) -->
+        <label class="ow-label" id="soIdaLabel">
           <input type="checkbox" id="soIda"/>
           <span data-i18n="step1.oneway">Somente ida — sem data de retorno</span>
         </label>

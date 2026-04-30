@@ -111,6 +111,52 @@ select option { background: #1a120b; color: var(--sand); }
   appearance: auto; -webkit-appearance: auto;
 }
 
+/* ── Datas flexíveis ── */
+.flex-dates-row {
+  display: flex; align-items: center; gap: .5rem;
+  flex-wrap: wrap; margin-top: 4px;
+}
+/* The ow-label inside flex-dates-row needs no left/right padding offset */
+.flex-dates-row .ow-label { padding: .25rem 0 .25rem .875rem; }
+
+.flex-selector {
+  display: none; gap: .35rem; align-items: center; flex-wrap: wrap;
+}
+.flex-selector.visible { display: flex; }
+
+.flex-btn {
+  padding: .25rem .65rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: transparent;
+  color: var(--mut);
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--tx-xs);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--dur) var(--ease);
+  min-height: 30px;
+}
+.flex-btn:hover { border-color: var(--accl); color: var(--sand); }
+.flex-btn.active {
+  background: rgba(201,98,47,.16);
+  border-color: var(--acc);
+  color: var(--sand);
+}
+
+/* Badge inside detail panel */
+.flex-best-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .68rem; color: var(--accl);
+  background: rgba(201,98,47,.1);
+  border: 1px solid rgba(201,98,47,.25);
+  border-radius: 20px; padding: .2rem .6rem;
+  margin-top: .3rem;
+}
+
+/* Somente ida — small top margin to separate from flex row */
+#soIdaLabel { padding-top: 0; }
+
 /* ── Autocomplete ── */
 .ac-wrap { position: relative; }
 .ac-wrap input { padding-right: 2.5rem; }
