@@ -27,49 +27,48 @@
   // clearly as a plane and not a bird/cross.
   function _drawPlane(ctx, s) {
 
-    // ① Fuselage — thin elongated body, nose points right (+x)
+    // ① Fuselage — rounded nose, commercial airliner body
     ctx.beginPath();
-    ctx.moveTo( s * 1.0,  0        );  // nose
-    ctx.lineTo( s * 0.55, -s * .09 );  // upper-front
-    ctx.lineTo(-s * 0.85, -s * .09 );  // upper-rear
-    ctx.lineTo(-s * 1.0,   0       );  // tail tip
-    ctx.lineTo(-s * 0.85,  s * .09 );  // lower-rear
-    ctx.lineTo( s * 0.55,  s * .09 );  // lower-front
+    ctx.moveTo( s * 0.82,  0        );  // nose (rounded, not pointy)
+    ctx.lineTo( s * 0.50, -s * .10  );  // upper-front
+    ctx.lineTo(-s * 0.80, -s * .10  );  // upper-rear
+    ctx.lineTo(-s * 0.92,  0        );  // tail end
+    ctx.lineTo(-s * 0.80,  s * .10  );  // lower-rear
+    ctx.lineTo( s * 0.50,  s * .10  );  // lower-front
     ctx.closePath();
     ctx.fill();
 
-    // ② Main wings — perpendicular, swept slightly back
-    //   span = 0.5 s each side  (total wingspan ≈ fuselage length)
+    // ② Main wings — slightly swept, positioned mid-body
     ctx.beginPath();
-    ctx.moveTo( s * 0.18, -s * .08 );  // root forward
-    ctx.lineTo(-s * 0.08, -s * .08 );  // root rearward
-    ctx.lineTo(-s * 0.28, -s * .52 );  // tip rearward
-    ctx.lineTo(-s * 0.05, -s * .52 );  // tip forward
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo( s * 0.18,  s * .08 );
-    ctx.lineTo(-s * 0.05,  s * .52 );
-    ctx.lineTo(-s * 0.28,  s * .52 );
-    ctx.lineTo(-s * 0.08,  s * .08 );
-    ctx.closePath();
-    ctx.fill();
-
-    // ③ Tail fins — small, at the rear
-    ctx.beginPath();
-    ctx.moveTo(-s * 0.60, -s * .08 );
-    ctx.lineTo(-s * 0.75, -s * .08 );
-    ctx.lineTo(-s * 0.90, -s * .30 );
-    ctx.lineTo(-s * 0.68, -s * .30 );
+    ctx.moveTo( s * 0.22, -s * .09 );  // root forward
+    ctx.lineTo(-s * 0.06, -s * .09 );  // root rearward
+    ctx.lineTo(-s * 0.24, -s * .52 );  // tip rearward
+    ctx.lineTo(-s * 0.02, -s * .52 );  // tip forward
     ctx.closePath();
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(-s * 0.60,  s * .08 );
-    ctx.lineTo(-s * 0.68,  s * .30 );
-    ctx.lineTo(-s * 0.90,  s * .30 );
-    ctx.lineTo(-s * 0.75,  s * .08 );
+    ctx.moveTo( s * 0.22,  s * .09 );
+    ctx.lineTo(-s * 0.02,  s * .52 );
+    ctx.lineTo(-s * 0.24,  s * .52 );
+    ctx.lineTo(-s * 0.06,  s * .09 );
+    ctx.closePath();
+    ctx.fill();
+
+    // ③ Tail fins — much smaller (passenger jet, not fighter)
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.62, -s * .09 );
+    ctx.lineTo(-s * 0.74, -s * .09 );
+    ctx.lineTo(-s * 0.84, -s * .20 );  // ← smaller (was .30)
+    ctx.lineTo(-s * 0.65, -s * .20 );
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.62,  s * .09 );
+    ctx.lineTo(-s * 0.65,  s * .20 );
+    ctx.lineTo(-s * 0.84,  s * .20 );
+    ctx.lineTo(-s * 0.74,  s * .09 );
     ctx.closePath();
     ctx.fill();
   }
