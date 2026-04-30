@@ -1,7 +1,6 @@
 /**
  * modules/planes.js — Subtle animated planes in background
- * Pure canvas, no DOM elements, zero performance impact.
- * Uses canvas paths (not emoji) so orientation is consistent on all platforms.
+ * Pure canvas paths — consistent orientation on all platforms/browsers.
  */
 
 (function(){
@@ -11,55 +10,66 @@
   const ctx = canvas.getContext('2d');
   let W, H, planes = [], animId;
 
-  // ── Config ───────────────────────────────────────────────────────
   const CFG = {
-    count:    window.innerWidth < 600 ? 4 : 6, // fewer planes on mobile
+    count:    window.innerWidth < 600 ? 4 : 6,
     minSpeed: 0.25,
     maxSpeed: 0.55,
-    minSize:  8,
-    maxSize:  16,
-    opacity:  0.11,
+    minSize:  10,   // half-length of fuselage
+    maxSize:  18,
+    opacity:  0.13,
   };
 
-  // ── Helpers ──────────────────────────────────────────────────────
   function rand(min, max){ return min + Math.random() * (max - min); }
 
-  // ── Draw plane shape pointing RIGHT (0°) ─────────────────────────
-  // Canvas rotation then handles direction of travel.
+  // ── Plane silhouette pointing RIGHT ──────────────────────────────
+  // s = half-fuselage-length. All dimensions relative to s.
+  // Fuselage dominates; wings are ~50 % of fuselage span so it reads
+  // clearly as a plane and not a bird/cross.
   function _drawPlane(ctx, s) {
-    // Fuselage — nose points right (+x)
+
+    // ① Fuselage — thin elongated body, nose points right (+x)
     ctx.beginPath();
-    ctx.moveTo( s,       0        );  // nose
-    ctx.lineTo(-s * .5, -s * .22  );  // upper-rear fuselage
-    ctx.lineTo(-s * .7,  0        );  // tail
-    ctx.lineTo(-s * .5,  s * .22  );  // lower-rear fuselage
+    ctx.moveTo( s * 1.0,  0        );  // nose
+    ctx.lineTo( s * 0.55, -s * .09 );  // upper-front
+    ctx.lineTo(-s * 0.85, -s * .09 );  // upper-rear
+    ctx.lineTo(-s * 1.0,   0       );  // tail tip
+    ctx.lineTo(-s * 0.85,  s * .09 );  // lower-rear
+    ctx.lineTo( s * 0.55,  s * .09 );  // lower-front
     ctx.closePath();
     ctx.fill();
 
-    // Upper wing
+    // ② Main wings — perpendicular, swept slightly back
+    //   span = 0.5 s each side  (total wingspan ≈ fuselage length)
     ctx.beginPath();
-    ctx.moveTo( s * .2,  -s * .12 );  // wing root (forward)
-    ctx.lineTo(-s * .22, -s * .12 );  // wing root (rear)
-    ctx.lineTo(-s * .42, -s * .82 );  // wing tip (rear)
-    ctx.lineTo(-s * .08, -s * .82 );  // wing tip (forward)
+    ctx.moveTo( s * 0.18, -s * .08 );  // root forward
+    ctx.lineTo(-s * 0.08, -s * .08 );  // root rearward
+    ctx.lineTo(-s * 0.28, -s * .52 );  // tip rearward
+    ctx.lineTo(-s * 0.05, -s * .52 );  // tip forward
     ctx.closePath();
     ctx.fill();
 
-    // Lower wing (mirror)
     ctx.beginPath();
-    ctx.moveTo( s * .2,   s * .12 );
-    ctx.lineTo(-s * .08,  s * .82 );
-    ctx.lineTo(-s * .42,  s * .82 );
-    ctx.lineTo(-s * .22,  s * .12 );
+    ctx.moveTo( s * 0.18,  s * .08 );
+    ctx.lineTo(-s * 0.05,  s * .52 );
+    ctx.lineTo(-s * 0.28,  s * .52 );
+    ctx.lineTo(-s * 0.08,  s * .08 );
     ctx.closePath();
     ctx.fill();
 
-    // Tail fin
+    // ③ Tail fins — small, at the rear
     ctx.beginPath();
-    ctx.moveTo(-s * .48, -s * .1  );
-    ctx.lineTo(-s * .68, -s * .1  );
-    ctx.lineTo(-s * .84, -s * .46 );
-    ctx.lineTo(-s * .58, -s * .46 );
+    ctx.moveTo(-s * 0.60, -s * .08 );
+    ctx.lineTo(-s * 0.75, -s * .08 );
+    ctx.lineTo(-s * 0.90, -s * .30 );
+    ctx.lineTo(-s * 0.68, -s * .30 );
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-s * 0.60,  s * .08 );
+    ctx.lineTo(-s * 0.68,  s * .30 );
+    ctx.lineTo(-s * 0.90,  s * .30 );
+    ctx.lineTo(-s * 0.75,  s * .08 );
     ctx.closePath();
     ctx.fill();
   }
@@ -70,10 +80,10 @@
     let x, y, angle;
 
     switch(edge){
-      case 0: x = rand(0,W); y = -30;    angle = rand(20,  160); break; // top
-      case 1: x = W + 30;   y = rand(0,H); angle = rand(110,250); break; // right
-      case 2: x = rand(0,W); y = H + 30; angle = rand(200,340); break; // bottom
-      default:x = -30;      y = rand(0,H); angle = rand(-70, 70); break; // left
+      case 0: x = rand(0,W); y = -40;    angle = rand( 20, 160); break; // top
+      case 1: x = W + 40;   y = rand(0,H); angle = rand(110, 250); break; // right
+      case 2: x = rand(0,W); y = H + 40; angle = rand(200, 340); break; // bottom
+      default:x = -40;      y = rand(0,H); angle = rand(-70,  70); break; // left
     }
 
     const size  = rand(CFG.minSize, CFG.maxSize);
@@ -95,7 +105,7 @@
     return p.x < -m || p.x > W + m || p.y < -m || p.y > H + m;
   }
 
-  // ── Resize ───────────────────────────────────────────────────────
+  // ── Resize — setTransform resets before scaling ──────────────────
   function resize(){
     const dpr = window.devicePixelRatio || 1;
     W = window.innerWidth;
@@ -104,14 +114,12 @@
     canvas.height = H * dpr;
     canvas.style.width  = W + 'px';
     canvas.style.height = H + 'px';
-    // setTransform resets before scaling — prevents accumulation on repeated resizes
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   // ── Draw ─────────────────────────────────────────────────────────
   function draw(){
     ctx.clearRect(0, 0, W, H);
-
     planes.forEach(p => {
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -134,20 +142,16 @@
   // ── Init ─────────────────────────────────────────────────────────
   function init(){
     resize();
-
     planes = Array.from({ length: CFG.count }, () => {
       const p = spawnPlane();
-      // Scatter planes across the screen at startup
       const t = rand(0.1, 0.9);
       p.x += p.vx * W * t / Math.abs(p.vx || 1);
       p.y += p.vy * H * t / Math.abs(p.vy || 1);
       return p;
     });
-
     tick();
   }
 
-  // ── Pause when tab hidden ────────────────────────────────────────
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) cancelAnimationFrame(animId);
     else tick();
