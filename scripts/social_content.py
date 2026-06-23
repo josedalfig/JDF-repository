@@ -82,35 +82,58 @@ def generate_posts(deals: list[dict], target_date: date) -> dict:
         for d in deals
     )
 
+    import random
+    post_format = random.choice(['quanto_custa', 'filtro_perfil', 'iatlas_cta'])
+
+    # Exemplos de filtros de perfil de viagem para variar o conteúdo
+    filtros = random.choice([
+        ('frio', 'destinos gelados, montanhas, inverno europeu'),
+        ('calor', 'praias, caribe, nordeste brasileiro'),
+        ('romântico', 'cidades históricas, jantar a dois, pôr do sol'),
+        ('família', 'parques temáticos, destinos seguros, atividades para crianças'),
+        ('aventura', 'trilhas, natureza, esportes radicais'),
+        ('cultura', 'museus, gastronomia, arquitetura histórica'),
+    ])
+
     prompt = f"""Você é o copywriter do "Viajar sem Destino" (@viajarsemdestino.oficial).
 
-Posicionamento da marca: responde a pergunta que ninguém mais responde — "Eu tenho R$X e uma semana. Pra onde eu vou?"
-Inimigo declarado: a paralisia de escolha + a ideia de que viajar é caro demais.
-Tom: pessoa falando com pessoa. Nunca corporativo. Nunca "pacote dos sonhos".
+Posicionamento: responde a pergunta que ninguém responde — "Eu tenho R$X e uma semana. Pra onde eu vou?"
+Inimigo: paralisia de escolha + "viajar é caro demais".
+Tom: PROVOCATIVO. Pessoa com pessoa. Irônico quando necessário. Nunca corporativo.
+Diferencial: o app tem a IAtlas — uma IA que faz uma entrevista rápida e encontra o destino ideal pro seu perfil e budget.
 
 Deals de passagens encontrados hoje ({target_date}):
 {deals_text}
 
-Pilar: "Quanto custa?" — choque positivo. Revelar o preço REAL de um destino que parece caro.
-Mecânica: gancho de surpresa → revela o preço → CTA (salva / manda pro amigo).
+FORMATO DO POST DE HOJE: {post_format}
+Filtro de perfil para usar se relevante: {filtros[0]} ({filtros[1]})
 
-Gere DOIS posts em PT-BR:
+Se "quanto_custa":
+  Pilar 1 — choque positivo com o preço real. Gancho provocativo → revela preço → CTA.
+  Ex de gancho: "Você acha que Lisboa é caro? Espera ver isso 👇" / "R$2.300. Esse é o preço de ir pra fora do Brasil."
+  CTA: "salva pra não esquecer" ou "manda pra quem você quer levar".
 
-POST 1 — INSTAGRAM (máx 150 palavras, 3-4 hashtags relevantes):
-- Primeira linha é o gancho: algo que faça parar de rolar (ex: "Esse lugar parece caríssimo. Custa R$1.890 👇")
-- Escolhe o deal com melhor relação impacto/preço (destino conhecido + preço surpreendente)
-- Termina com CTA: "salva pra não perder" ou "manda pra quem você quer levar"
-- Hashtags no final, não no meio do texto
+Se "filtro_perfil":
+  Pilar 2 — mostra que o destino combina com um perfil específico usando o filtro acima.
+  Ex: "Quer frio, paisagem e história por menos de R$4k? Esse destino te surpreende."
+  Mencione que no app dá pra filtrar por esse tipo de experiência.
+  CTA: "comenta o que você prefere: {filtros[0]} ou [oposto]?"
 
-POST 2 — X/TWITTER (máx 280 caracteres):
-- Versão telegráfica do mesmo gancho. Emoji com moderação.
+Se "iatlas_cta":
+  Pilar 2/3 — apresenta a IAtlas de forma intrigante.
+  Ex: "Você não sabe pra onde viajar. A gente sabe. Responde 3 perguntas e a IAtlas te mostra o destino ideal pro seu budget."
+  Tom: desafiador. "Testa aí" é melhor que "clique aqui".
+  CTA: direciona pro app.
+
+Sempre PT-BR. 3-4 hashtags no final do Instagram, nunca no meio.
+
+POST X/TWITTER (máx 280 caracteres): versão telegráfica, mais ácida/direta.
 
 IMAGE PROMPT — em inglês, para gerador de imagem (Midjourney/DALL-E):
-Foto inspiradora do destino escolhido no post. Estilo: travel photography, golden hour, cores vibrantes.
-Deve transmitir "esse lugar é possível pra mim". Evitar imagens de luxo exagerado.
-Inclua o nome da cidade/destino e referências visuais específicas do lugar.
-Formato: 4:5 vertical (Instagram). Sem texto sobreposto na imagem.
-Identidade visual da marca: terracota laranja (#C8662E), sensação de descoberta.
+Travel photo of the featured destination. Style: authentic travel photography, golden hour or blue hour, vibrant but realistic colors.
+Must feel achievable, not luxury. Real people, real places. No stock photo feel.
+Include city name and specific visual references (landmark, street, nature).
+Format: 4:5 vertical. No text overlay. Brand accent: terracotta orange (#C8662E).
 
 Responda APENAS com JSON válido neste formato:
 {{"instagram": "<texto>", "x": "<texto>", "image_prompt": "<prompt em inglês>"}}"""
