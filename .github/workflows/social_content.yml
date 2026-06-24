@@ -1,0 +1,26 @@
+name: Social Content — Viajar sem Destino
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: [self-hosted, mac-jose-local]
+
+    env:
+      VSD_SUPABASE_ANON_KEY:            ${{ secrets.VSD_SUPABASE_ANON_KEY }}
+      ANTHROPIC_API_KEY:                ${{ secrets.ANTHROPIC_API_KEY }}
+      BUFFER_ACCESS_TOKEN_VSD:          ${{ secrets.BUFFER_ACCESS_TOKEN_VSD }}
+      BUFFER_PROFILE_ID_INSTAGRAM_VSD:  ${{ secrets.BUFFER_PROFILE_ID_INSTAGRAM_VSD }}
+      BUFFER_PROFILE_ID_X_VSD:          ${{ secrets.BUFFER_PROFILE_ID_X_VSD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip3 install anthropic requests
+
+      - name: Generate and send posts
+        run: python3 scripts/social_content.py
