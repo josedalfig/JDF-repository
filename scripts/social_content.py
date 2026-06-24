@@ -141,16 +141,25 @@ Responda APENAS com JSON válido neste formato:
 
     msg = client.messages.create(
         model='claude-sonnet-4-6',
-        max_tokens=600,
+        max_tokens=1500,
         messages=[{'role': 'user', 'content': prompt}],
     )
 
     text = msg.content[0].text.strip()
     if text.startswith('```'):
-        text = text.split('```')[1]
+        parts = text.split('```')
+        text = parts[1] if len(parts) > 1 else parts[0]
         if text.startswith('json'):
             text = text[4:]
-    return json.loads(text)
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        import re
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+        raise
 
 
 # ── Buffer ───────────────────────────────────────────────────────────────────
