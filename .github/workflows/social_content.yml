@@ -15,6 +15,7 @@ jobs:
       BUFFER_ACCESS_TOKEN_VSD:          ${{ secrets.BUFFER_ACCESS_TOKEN_VSD }}
       BUFFER_PROFILE_ID_INSTAGRAM_VSD:  ${{ secrets.BUFFER_PROFILE_ID_INSTAGRAM_VSD }}
       BUFFER_PROFILE_ID_X_VSD:          ${{ secrets.BUFFER_PROFILE_ID_X_VSD }}
+      BUFFER_ORG_ID_VSD:                ${{ secrets.BUFFER_ORG_ID_VSD }}
 
     steps:
       - uses: actions/checkout@v4

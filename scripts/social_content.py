@@ -18,6 +18,7 @@ ANTHROPIC_API_KEY = os.environ['ANTHROPIC_API_KEY']
 BUFFER_ACCESS_TOKEN  = os.environ['BUFFER_ACCESS_TOKEN_VSD']
 BUFFER_CHANNEL_INSTA = os.environ['BUFFER_PROFILE_ID_INSTAGRAM_VSD']
 BUFFER_CHANNEL_X     = os.environ['BUFFER_PROFILE_ID_X_VSD']
+BUFFER_ORG_ID        = os.environ['BUFFER_ORG_ID_VSD']
 BUFFER_GRAPHQL       = 'https://api.buffer.com/graphql'
 
 # IATA → nome legível (expande conforme necessário)
@@ -156,14 +157,16 @@ Responda APENAS com JSON válido neste formato:
 
 def buffer_create_draft(channel_id: str, text: str):
     mutation = """
-    mutation CreateIdea($input: IdeaInput!) {
+    mutation CreateIdea($input: CreateIdeaInput!) {
       createIdea(input: $input) {
-        idea { id }
+        ... on IdeaResponse { idea { id } }
+        ... on MutationError { message }
       }
     }
     """
     variables = {
         'input': {
+            'organizationId': BUFFER_ORG_ID,
             'content': {'text': text},
             'channelIds': [channel_id],
         }
