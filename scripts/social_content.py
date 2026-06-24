@@ -136,35 +136,51 @@ Must feel achievable, not luxury. Real people, real places. No stock photo feel.
 Include city name and specific visual references (landmark, street, nature).
 Format: 4:5 vertical. No text overlay. Brand accent: terracotta orange (#C8662E).
 
-Responda APENAS com JSON válido neste formato:
-{{"instagram": "<texto>", "x": "<texto>", "image_prompt": "<prompt em inglês>"}}"""
+Gere os 3 campos usando a ferramenta publish_posts."""
+
+    tools = [
+        {
+            'name': 'publish_posts',
+            'description': 'Publica os posts gerados nas redes sociais.',
+            'input_schema': {
+                'type': 'object',
+                'properties': {
+                    'instagram': {
+                        'type': 'string',
+                        'description': 'Texto completo do post para Instagram em PT-BR, incluindo hashtags.',
+                    },
+                    'x': {
+                        'type': 'string',
+                        'description': 'Texto para X/Twitter em PT-BR, máx 280 caracteres.',
+                    },
+                    'image_prompt': {
+                        'type': 'string',
+                        'description': 'Prompt em inglês para gerador de imagem (Midjourney/DALL-E).',
+                    },
+                },
+                'required': ['instagram', 'x', 'image_prompt'],
+            },
+        }
+    ]
 
     msg = client.messages.create(
         model='claude-sonnet-4-6',
         max_tokens=1500,
+        tools=tools,
+        tool_choice={'type': 'any'},
         messages=[{'role': 'user', 'content': prompt}],
     )
 
-    text = msg.content[0].text.strip()
-    if text.startswith('```'):
-        parts = text.split('```')
-        text = parts[1] if len(parts) > 1 else parts[0]
-        if text.startswith('json'):
-            text = text[4:]
-    text = text.strip()
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        import re
-        match = re.search(r'\{.*\}', text, re.DOTALL)
-        if match:
-            return json.loads(match.group())
-        raise
+    for block in msg.content:
+        if block.type == 'tool_use' and block.name == 'publish_posts':
+            return block.input
+
+    raise RuntimeError('Claude não retornou tool_use esperado')
 
 
 # ── Buffer ───────────────────────────────────────────────────────────────────
 
-def buffer_create_draft(channel_id: str, text: str):
+def buffer_create_draft(text: str):
     mutation = """
     mutation CreateIdea($input: CreateIdeaInput!) {
       createIdea(input: $input) {
@@ -177,7 +193,6 @@ def buffer_create_draft(channel_id: str, text: str):
         'input': {
             'organizationId': BUFFER_ORG_ID,
             'content': {'text': text},
-            'channelIds': [channel_id],
         }
     }
     resp = requests.post(
@@ -223,9 +238,10 @@ def main():
     print(f'[VsD] X: {posts["x"]}')
 
     print('[VsD] Enviando rascunhos ao Buffer...')
-    insta_full = f"{posts['instagram']}\n\n---\n🎨 PROMPT DE IMAGEM:\n{posts['image_prompt']}"
-    buffer_create_draft(BUFFER_CHANNEL_INSTA, insta_full)
-    buffer_create_draft(BUFFER_CHANNEL_X,     posts['x'])
+    insta_full = f"[INSTAGRAM]\n{posts['instagram']}\n\n---\n🎨 PROMPT DE IMAGEM:\n{posts['image_prompt']}"
+    x_full = f"[X/TWITTER]\n{posts['x']}"
+    buffer_create_draft(insta_full)
+    buffer_create_draft(x_full)
 
     print('[VsD] Concluído.')
 
