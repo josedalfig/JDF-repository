@@ -79,7 +79,7 @@ def generate_posts(deals: list[dict], target_date: date) -> dict:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
     deals_text = '\n'.join(
-        f"- {d['from']} → {d['to']}: R$ {d['price']:,.0f}".replace(',', '.')
+        f"- {d['from']} → {d['to']}: a partir de R$ {d['price']:,.0f}".replace(',', '.')
         for d in deals
     )
 
@@ -128,15 +128,18 @@ Se "iatlas_cta":
 
 Sempre PT-BR. 3-4 hashtags no final do Instagram, nunca no meio.
 
-POST X/TWITTER (máx 280 caracteres): versão telegráfica, mais ácida/direta.
+POST X/TWITTER (máx 280 caracteres): versão telegráfica, mais ácida/direta. Use "a partir de R$X" para preços.
 
-IMAGE PROMPT — em inglês, para gerador de imagem (Midjourney/DALL-E):
+IMAGE PROMPT INSTAGRAM — em inglês, para gerador de imagem (Midjourney/DALL-E):
 Travel photo of the featured destination. Style: authentic travel photography, golden hour or blue hour, vibrant but realistic colors.
 Must feel achievable, not luxury. Real people, real places. No stock photo feel.
 Include city name and specific visual references (landmark, street, nature).
 Format: 4:5 vertical. No text overlay. Brand accent: terracotta orange (#C8662E).
 
-Gere os 3 campos usando a ferramenta publish_posts."""
+IMAGE PROMPT X/TWITTER — mesmo conceito e destino, mas formato paisagem 16:9 horizontal, adequado para timeline do X.
+Wide establishing shot, dramatic landscape, cinematic feel. Same brand accent terracotta orange (#C8662E). No text overlay.
+
+Gere os 4 campos usando a ferramenta publish_posts."""
 
     tools = [
         {
@@ -153,12 +156,16 @@ Gere os 3 campos usando a ferramenta publish_posts."""
                         'type': 'string',
                         'description': 'Texto para X/Twitter em PT-BR, máx 280 caracteres.',
                     },
-                    'image_prompt': {
+                    'image_prompt_instagram': {
                         'type': 'string',
-                        'description': 'Prompt em inglês para gerador de imagem (Midjourney/DALL-E).',
+                        'description': 'Prompt em inglês para imagem do Instagram (4:5 vertical).',
+                    },
+                    'image_prompt_x': {
+                        'type': 'string',
+                        'description': 'Prompt em inglês para imagem do X/Twitter (16:9 horizontal).',
                     },
                 },
-                'required': ['instagram', 'x', 'image_prompt'],
+                'required': ['instagram', 'x', 'image_prompt_instagram', 'image_prompt_x'],
             },
         }
     ]
@@ -238,8 +245,8 @@ def main():
     print(f'[VsD] X: {posts["x"]}')
 
     print('[VsD] Enviando rascunhos ao Buffer...')
-    insta_full = f"[INSTAGRAM]\n{posts['instagram']}\n\n---\n🎨 PROMPT DE IMAGEM:\n{posts['image_prompt']}"
-    x_full = f"[X/TWITTER]\n{posts['x']}"
+    insta_full = f"[INSTAGRAM]\n{posts['instagram']}\n\n---\n🎨 PROMPT DE IMAGEM (4:5):\n{posts['image_prompt_instagram']}"
+    x_full = f"[X/TWITTER]\n{posts['x']}\n\n---\n🎨 PROMPT DE IMAGEM (16:9):\n{posts['image_prompt_x']}"
     buffer_create_draft(insta_full)
     buffer_create_draft(x_full)
 
