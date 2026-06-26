@@ -44,13 +44,13 @@ def iata_name(code: str) -> str:
 # ── Data fetching ────────────────────────────────────────────────────────────
 
 def fetch_best_deals(target_date: date) -> list[dict]:
-    """Rotas com menor preço registradas hoje, excluindo origens domésticas óbvias."""
-    since = f'{target_date}T00:00:00+00:00'
+    """Melhores preços únicos por rota nos últimos 7 dias."""
+    since = f'{target_date - timedelta(days=7)}T00:00:00+00:00'
     params = {
         'select':    'origin_iata,dest_iata,price,fetched_at',
         'fetched_at': f'gte.{since}',
         'order':     'price.asc',
-        'limit':     '5',
+        'limit':     '50',
     }
     resp = requests.get(
         f'{SUPABASE_URL}/price_history',
@@ -63,13 +63,22 @@ def fetch_best_deals(target_date: date) -> list[dict]:
     )
     resp.raise_for_status()
     rows = resp.json()
+
+    # Deduplica: melhor preço por rota única
+    seen = {}
+    for r in rows:
+        key = (r['origin_iata'], r['dest_iata'])
+        if key not in seen or r['price'] < seen[key]['price']:
+            seen[key] = r
+
+    unique = sorted(seen.values(), key=lambda r: r['price'])[:5]
     return [
         {
             'from':  iata_name(r['origin_iata']),
             'to':    iata_name(r['dest_iata']),
             'price': r['price'],
         }
-        for r in rows
+        for r in unique
     ]
 
 
@@ -225,11 +234,6 @@ def main():
     print(f'[VsD] Buscando deals de {target_date}...')
 
     deals = fetch_best_deals(target_date)
-    if not deals:
-        # Tenta ontem se hoje ainda não tiver dados
-        target_date = date.today() - timedelta(days=1)
-        print(f'[VsD] Sem dados hoje. Tentando {target_date}...')
-        deals = fetch_best_deals(target_date)
 
     if not deals:
         print('[VsD] Sem dados suficientes. Abortando.')
