@@ -21,19 +21,36 @@ BUFFER_CHANNEL_X     = os.environ['BUFFER_PROFILE_ID_X_VSD']
 BUFFER_ORG_ID        = os.environ['BUFFER_ORG_ID_VSD']
 BUFFER_GRAPHQL       = 'https://api.buffer.com/graphql'
 
-# IATA → nome legível (expande conforme necessário)
+# IATA → nome legível
 IATA_NAMES = {
-    'POA': 'Porto Alegre', 'GRU': 'São Paulo', 'GIG': 'Rio de Janeiro',
-    'BSB': 'Brasília',     'SSA': 'Salvador',   'FOR': 'Fortaleza',
-    'REC': 'Recife',       'MAN': 'Manaus',     'BEL': 'Belém',
-    'CWB': 'Curitiba',     'FLN': 'Florianópolis',
-    'LIS': 'Lisboa',       'OPO': 'Porto',      'MAD': 'Madrid',
-    'BCN': 'Barcelona',    'MIA': 'Miami',       'JFK': 'Nova York',
-    'MCO': 'Orlando',      'CDG': 'Paris',       'LHR': 'Londres',
-    'FCO': 'Roma',         'AMS': 'Amsterdã',    'DXB': 'Dubai',
-    'AKL': 'Auckland',     'NRT': 'Tóquio',      'BKK': 'Bangkok',
-    'AJU': 'Aracaju',      'CGB': 'Cuiabá',      'NAT': 'Natal',
-    'MCZ': 'Maceió',       'VCP': 'Campinas',    'SDU': 'Rio (Santos Dumont)',
+    'POA': 'Porto Alegre',      'GRU': 'São Paulo (GRU)',   'GIG': 'Rio de Janeiro',
+    'BSB': 'Brasília',          'SSA': 'Salvador',           'FOR': 'Fortaleza',
+    'REC': 'Recife',            'MAN': 'Manaus',             'BEL': 'Belém',
+    'CWB': 'Curitiba',          'FLN': 'Florianópolis',      'NAT': 'Natal',
+    'MCZ': 'Maceió',            'SDU': 'Rio (Santos Dumont)','CGH': 'São Paulo (Congonhas)',
+    'VCP': 'Campinas',          'AJU': 'Aracaju',
+    # Internacional
+    'LIS': 'Lisboa',            'OPO': 'Porto',              'MAD': 'Madrid',
+    'BCN': 'Barcelona',         'MIA': 'Miami',              'JFK': 'Nova York',
+    'MCO': 'Orlando',           'CDG': 'Paris',              'LHR': 'Londres',
+    'FCO': 'Roma',              'AMS': 'Amsterdã',           'DXB': 'Dubai',
+    'NRT': 'Tóquio',            'BKK': 'Bangkok',            'EZE': 'Buenos Aires',
+    'SCL': 'Santiago',          'BOG': 'Bogotá',             'LIM': 'Lima',
+    'CUN': 'Cancún',            'MXP': 'Milão',              'ZRH': 'Zurique',
+}
+
+# Aeroportos domésticos relevantes (top 10 + Congonhas/Santos Dumont)
+MAJOR_DOMESTIC = {
+    'GRU', 'CGH', 'SDU', 'GIG', 'BSB', 'SSA', 'FOR', 'REC', 'CWB', 'POA', 'FLN', 'NAT', 'BEL', 'MAN',
+}
+
+# Hubs para rotas internacionais
+INTL_HUBS = {'GRU', 'GIG'}
+
+# Destinos internacionais aceitos
+INTL_DESTINATIONS = {
+    'LIS', 'OPO', 'MAD', 'BCN', 'MIA', 'JFK', 'MCO', 'CDG', 'LHR', 'FCO',
+    'AMS', 'DXB', 'NRT', 'BKK', 'EZE', 'SCL', 'BOG', 'LIM', 'CUN', 'MXP', 'ZRH',
 }
 
 
@@ -43,14 +60,16 @@ def iata_name(code: str) -> str:
 
 # ── Data fetching ────────────────────────────────────────────────────────────
 
-def fetch_best_deals(target_date: date) -> list[dict]:
-    """Melhores preços únicos por rota nos últimos 7 dias."""
+def fetch_best_deals(target_date: date) -> tuple[list[dict], bool]:
+    """Melhores preços únicos por rota relevante nos últimos 7 dias.
+    Retorna (deals, has_fresh_data) onde has_fresh_data=True se há dados de hoje ou ontem."""
     since = f'{target_date - timedelta(days=7)}T00:00:00+00:00'
+    fresh_since = f'{target_date - timedelta(days=1)}T00:00:00+00:00'
     params = {
         'select':    'origin_iata,dest_iata,price,fetched_at',
         'fetched_at': f'gte.{since}',
         'order':     'price.asc',
-        'limit':     '50',
+        'limit':     '200',
     }
     resp = requests.get(
         f'{SUPABASE_URL}/price_history',
@@ -64,15 +83,30 @@ def fetch_best_deals(target_date: date) -> list[dict]:
     resp.raise_for_status()
     rows = resp.json()
 
+    has_fresh = any(r['fetched_at'] >= fresh_since for r in rows)
+
+    # Filtra rotas relevantes
+    def is_relevant(r) -> bool:
+        orig, dest = r['origin_iata'], r['dest_iata']
+        # Doméstico: ambos aeroportos relevantes
+        if orig in MAJOR_DOMESTIC and dest in MAJOR_DOMESTIC:
+            return True
+        # Internacional: saindo de hub e destino conhecido
+        if orig in INTL_HUBS and dest in INTL_DESTINATIONS:
+            return True
+        return False
+
+    relevant = [r for r in rows if is_relevant(r)]
+
     # Deduplica: melhor preço por rota única
     seen = {}
-    for r in rows:
+    for r in relevant:
         key = (r['origin_iata'], r['dest_iata'])
         if key not in seen or r['price'] < seen[key]['price']:
             seen[key] = r
 
     unique = sorted(seen.values(), key=lambda r: r['price'])[:5]
-    return [
+    deals = [
         {
             'from':  iata_name(r['origin_iata']),
             'to':    iata_name(r['dest_iata']),
@@ -80,9 +114,65 @@ def fetch_best_deals(target_date: date) -> list[dict]:
         }
         for r in unique
     ]
+    return deals, has_fresh
 
 
 # ── Post generation ──────────────────────────────────────────────────────────
+
+def generate_institutional_post() -> dict:
+    """Post institucional para quando não há dados frescos de passagens."""
+    import random
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    topic = random.choice([
+        'como a IAtlas funciona e por que é diferente de um buscador de passagens',
+        'a paralisia de escolha em viagens: por que as pessoas não viajam mesmo tendo dinheiro',
+        'como viajar com budget limitado: desmistificando o custo real de uma viagem',
+        'por que destinos nacionais surpreendem mais do que o esperado',
+        'como filtrar destinos por perfil (frio, calor, aventura, família) e encontrar o lugar certo',
+    ])
+    prompt = f"""Você é o copywriter do "Viajar sem Destino" (@viajarsemdestino.oficial).
+
+Tom: PROVOCATIVO. Pessoa com pessoa. Irônico quando necessário. Nunca corporativo.
+Diferencial: o app tem a IAtlas — IA que entrevista o usuário e encontra o destino ideal pro perfil e budget.
+
+TEMA DO POST DE HOJE: {topic}
+
+Escreva um post educativo/institucional sem citar preços de passagens.
+Foco em gerar identificação, curiosidade ou reflexão. CTA para baixar o app ou comentar.
+Sem markdown. Sem asteriscos. 3-4 hashtags no final do Instagram.
+
+POST X/TWITTER (máx 280 caracteres): versão mais curta e direta do mesmo tema.
+
+IMAGE PROMPT INSTAGRAM (4:5 vertical): cena de viagem autêntica relacionada ao tema. Sem texto. Cor de acento terracota (#C8662E).
+IMAGE PROMPT X (16:9 horizontal): mesma cena adaptada para paisagem ampla.
+
+Gere os 4 campos usando a ferramenta publish_posts."""
+
+    tools = [{
+        'name': 'publish_posts',
+        'description': 'Publica os posts gerados.',
+        'input_schema': {
+            'type': 'object',
+            'properties': {
+                'instagram':           {'type': 'string'},
+                'x':                   {'type': 'string'},
+                'image_prompt_instagram': {'type': 'string'},
+                'image_prompt_x':      {'type': 'string'},
+            },
+            'required': ['instagram', 'x', 'image_prompt_instagram', 'image_prompt_x'],
+        },
+    }]
+
+    msg = client.messages.create(
+        model='claude-sonnet-4-6', max_tokens=1500,
+        tools=tools, tool_choice={'type': 'any'},
+        messages=[{'role': 'user', 'content': prompt}],
+    )
+    for block in msg.content:
+        if block.type == 'tool_use' and block.name == 'publish_posts':
+            return block.input
+    raise RuntimeError('Claude não retornou tool_use esperado')
+
 
 def generate_posts(deals: list[dict], target_date: date) -> dict:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -233,18 +323,18 @@ def main():
     target_date = date.today()
     print(f'[VsD] Buscando deals de {target_date}...')
 
-    deals = fetch_best_deals(target_date)
+    deals, has_fresh = fetch_best_deals(target_date)
 
-    if not deals:
-        print('[VsD] Sem dados suficientes. Abortando.')
-        sys.exit(0)
+    if not has_fresh or not deals:
+        print('[VsD] Sem dados frescos de passagens. Gerando post institucional...')
+        posts = generate_institutional_post()
+    else:
+        print(f'[VsD] {len(deals)} deals encontrados.')
+        for d in deals:
+            print(f"  {d['from']} → {d['to']}: R$ {d['price']:,}")
+        print('[VsD] Gerando posts via Claude...')
+        posts = generate_posts(deals, target_date)
 
-    print(f'[VsD] {len(deals)} deals encontrados.')
-    for d in deals:
-        print(f"  {d['from']} → {d['to']}: R$ {d['price']:,}")
-
-    print('[VsD] Gerando posts via Claude...')
-    posts = generate_posts(deals, target_date)
     print(f'[VsD] Instagram: {posts["instagram"][:80]}...')
     print(f'[VsD] X: {posts["x"]}')
 
