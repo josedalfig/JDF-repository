@@ -12,6 +12,8 @@ import requests
 from datetime import date, timedelta
 import anthropic
 
+ROUTES_HISTORY_FILE = os.path.expanduser('~/.vsd_recent_routes.json')
+
 SUPABASE_URL      = 'https://fdpgeacfeyzaocsqszyw.supabase.co/rest/v1'
 SUPABASE_ANON_KEY = os.environ['VSD_SUPABASE_ANON_KEY']
 ANTHROPIC_API_KEY = os.environ['ANTHROPIC_API_KEY']
@@ -56,6 +58,34 @@ INTL_DESTINATIONS = {
 
 def iata_name(code: str) -> str:
     return IATA_NAMES.get(code, code)
+
+
+def load_recent_routes(days: int = 7) -> set:
+    """Rotas postadas nos últimos N dias (evita repetição)."""
+    try:
+        with open(ROUTES_HISTORY_FILE) as f:
+            history = json.load(f)
+        cutoff = str(date.today() - timedelta(days=days))
+        return {r['route'] for r in history if r['date'] >= cutoff}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return set()
+
+
+def save_used_routes(routes: list[str]):
+    """Salva as rotas usadas hoje no histórico."""
+    try:
+        with open(ROUTES_HISTORY_FILE) as f:
+            history = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        history = []
+    today = str(date.today())
+    for r in routes:
+        history.append({'date': today, 'route': r})
+    # Mantém apenas últimos 30 dias
+    cutoff = str(date.today() - timedelta(days=30))
+    history = [h for h in history if h['date'] >= cutoff]
+    with open(ROUTES_HISTORY_FILE, 'w') as f:
+        json.dump(history, f)
 
 
 # ── Data fetching ────────────────────────────────────────────────────────────
@@ -105,12 +135,20 @@ def fetch_best_deals(target_date: date) -> tuple[list[dict], bool]:
         if key not in seen or r['price'] < seen[key]['price']:
             seen[key] = r
 
-    unique = sorted(seen.values(), key=lambda r: r['price'])[:5]
+    # Filtra rotas recentes para evitar repetição entre dias
+    recent_routes = load_recent_routes(days=7)
+    fresh_candidates = [r for r in seen.values() if f"{r['origin_iata']}-{r['dest_iata']}" not in recent_routes]
+
+    # Se todos já foram usados, usa pool completo (melhor repetir do que não postar)
+    pool = fresh_candidates if fresh_candidates else list(seen.values())
+    unique = sorted(pool, key=lambda r: r['price'])[:5]
+
     deals = [
         {
             'from':  iata_name(r['origin_iata']),
             'to':    iata_name(r['dest_iata']),
             'price': r['price'],
+            'route_key': f"{r['origin_iata']}-{r['dest_iata']}",
         }
         for r in unique
     ]
@@ -343,6 +381,10 @@ def main():
     x_full = f"[X/TWITTER]\n{posts['x']}\n\n---\n🎨 PROMPT DE IMAGEM (16:9):\n{posts['image_prompt_x']}"
     buffer_create_draft(insta_full)
     buffer_create_draft(x_full)
+
+    # Registra rotas usadas hoje para evitar repetição amanhã
+    if deals:
+        save_used_routes([d['route_key'] for d in deals])
 
     print('[VsD] Concluído.')
 
