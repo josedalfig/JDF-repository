@@ -299,20 +299,10 @@ def generate_posts(deals: list[dict], target_date: date) -> dict:
 
     import random
     post_format = random.choices(
-        ['quanto_custa', 'filtro_perfil', 'iatlas_cta', 'foi_real'],
+        ['quanto_custa', 'me_da_um_budget', 'ninguem_te_conta', 'foi_real'],
         weights=[4, 3, 2, 1],
         k=1
     )[0]
-
-    # Exemplos de filtros de perfil de viagem para variar o conteúdo
-    filtros = random.choice([
-        ('frio', 'destinos gelados, montanhas, inverno europeu'),
-        ('calor', 'praias, caribe, nordeste brasileiro'),
-        ('romântico', 'cidades históricas, jantar a dois, pôr do sol'),
-        ('família', 'parques temáticos, destinos seguros, atividades para crianças'),
-        ('aventura', 'trilhas, natureza, esportes radicais'),
-        ('cultura', 'museus, gastronomia, arquitetura histórica'),
-    ])
 
     prompt = f"""Você é o copywriter do "Viajar sem Destino" (@viajarsemdestino.oficial).
 
@@ -325,32 +315,38 @@ Deals de passagens encontrados hoje ({target_date}):
 {deals_text}
 
 FORMATO DO POST DE HOJE: {post_format}
-Filtro de perfil para usar se relevante: {filtros[0]} ({filtros[1]})
 
 Se "quanto_custa":
   Pilar 1 — choque positivo com o preço real. Gancho provocativo → revela preço → CTA.
-  Ex de gancho: "Você acha que Lisboa é caro? Espera ver isso 👇" / "R$2.300. Esse é o preço de ir pra fora do Brasil."
-  CTA: "salva pra não esquecer" ou "manda pra quem você quer levar".
+  Ex de gancho: "Você acha que Lisboa é caro? Espera ver isso." / "R$2.300. Esse é o preço de ir pra fora do Brasil."
+  Use "a partir de R$ X" nos preços. Mostre 1 ou 2 rotas dos deals acima.
+  CTA opcional: "salva pra não esquecer" ou "manda pra quem você quer levar".
 
-Se "filtro_perfil":
-  Pilar 2 — mostra que o destino combina com um perfil específico usando o filtro acima.
-  Ex: "Quer frio, paisagem e história por menos de R$4k? Esse destino te surpreende."
-  Mencione que no app dá pra filtrar por esse tipo de experiência.
-  CTA: "comenta o que você prefere: {filtros[0]} ou [oposto]?"
+Se "me_da_um_budget":
+  Pilar 2 — "tenho R$X e X dias, pra onde eu vou?" Simula a pergunta real do usuário.
+  Usa os deals disponíveis como resposta concreta: com esse budget, dá pra ir pra X ou Y.
+  Inclui menção ao perfil da viagem (frio, cultura, praia, aventura, etc.) de forma natural.
+  Mencione que no app a IAtlas faz exatamente isso — cruza budget + perfil e aponta o destino.
+  CTA opcional: "comenta qual é o seu budget" ou "testa aí no app".
 
-Se "iatlas_cta":
-  Pilar 3 — apresenta a IAtlas de forma intrigante.
-  Ex: "Você não sabe pra onde viajar. A gente sabe. Responde 3 perguntas e a IAtlas te mostra o destino ideal pro seu budget."
-  Tom: desafiador. "Testa aí" é melhor que "clique aqui".
-  CTA: direciona pro app.
+Se "ninguem_te_conta":
+  Pilar 3 — dado, verdade ou comportamento que o viajante médio não sabe (mas deveria).
+  Ex: "Os preços de passagem caem nas quartas. A maioria compra no sábado e paga 40% a mais."
+  Ex: "GRU pra Lisboa em outubro custa R$2.200. Em julho, R$5.800. Mesmo assento, mesmo avião."
+  Use os dados dos deals como evidência, não como protagonista do post.
+  Tom: revelador, sem sensacionalismo. Fato seco + implicação prática.
+  CTA opcional: "salva isso" ou "passa pra frente".
 
 Se "foi_real":
   Pilar 4 — relato/experiência real de viajante usando os deals disponíveis.
   Tom: narrativo, primeira pessoa implícita, como se um amigo contasse.
   Mostre o destino da rota mais barata como vivência concreta: o que se faz lá, como é chegar, o que surpreende.
   Ex: "Fui pra Lisboa com R$2.800 tudo incluso. Isso não é viagem de rico. É questão de saber quando comprar."
-  Mencione o preço como dado de contexto, não como argumento principal — o argumento é a experiência.
-  CTA: "comenta se já foi" ou "manda pra quem ainda acha que é caro demais".
+  Preço como dado de contexto, não como argumento principal — o argumento é a experiência.
+  CTA opcional: "comenta se já foi" ou "manda pra quem ainda acha que é caro demais".
+
+Qualquer que seja o formato, o CTA é OPCIONAL e deve ser natural — não force se o post já fecha bem sem ele.
+A IAtlas pode ser mencionada como reforço em qualquer formato, mas nunca como tema principal (exceto me_da_um_budget).
 
 Sempre PT-BR. 3-4 hashtags no final do Instagram, nunca no meio.
 
