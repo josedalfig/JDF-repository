@@ -14,6 +14,47 @@ import anthropic
 
 ROUTES_HISTORY_FILE = os.path.expanduser('~/.vsd_recent_routes.json')
 
+CMO_LOG_DIR = os.path.expanduser('~/Documents/Pessoal/Claude Cowork/empresa-solo/CMO')
+CMO_PROJECT = 'vsd'
+
+
+def read_donna_voice() -> str:
+    try:
+        with open(os.path.join(CMO_LOG_DIR, 'VOZ.md')) as f:
+            return f.read().strip()
+    except OSError:
+        return ''
+
+
+def read_cmo_log(days: int = 10) -> str:
+    log_path = os.path.join(CMO_LOG_DIR, f'{CMO_PROJECT}-log.md')
+    cutoff = date.today() - timedelta(days=days)
+    entries = []
+    try:
+        with open(log_path) as f:
+            for line in f:
+                s = line.strip()
+                if not s or s.startswith('#') or s.startswith('<!--') or s in ('---', '(vazio — comece a preencher)'):
+                    continue
+                try:
+                    if date.fromisoformat(s[1:11]) >= cutoff:
+                        entries.append(s)
+                except (ValueError, IndexError):
+                    continue
+    except OSError:
+        pass
+    return '\n'.join(entries) if entries else 'Nenhum post registrado ainda.'
+
+
+def append_cmo_log(rede: str, tema: str, primeira_linha: str):
+    os.makedirs(CMO_LOG_DIR, exist_ok=True)
+    log_path = os.path.join(CMO_LOG_DIR, f'{CMO_PROJECT}-log.md')
+    if not os.path.exists(log_path):
+        with open(log_path, 'w') as f:
+            f.write(f'# LOG — Social {CMO_PROJECT.upper()}\n\nFormato: `[DATA] [REDE] tema — abertura`\n\n---\n\n')
+    with open(log_path, 'a') as f:
+        f.write(f'[{date.today()}] [{rede}] {tema} — {primeira_linha[:120]}\n')
+
 SUPABASE_URL      = 'https://fdpgeacfeyzaocsqszyw.supabase.co/rest/v1'
 SUPABASE_ANON_KEY = os.environ['VSD_SUPABASE_ANON_KEY']
 ANTHROPIC_API_KEY = os.environ['ANTHROPIC_API_KEY']
@@ -161,6 +202,8 @@ def generate_institutional_post() -> dict:
     """Post institucional para quando não há dados frescos de passagens."""
     import random
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    donna_voice = read_donna_voice()
+    recent_log  = read_cmo_log()
     topic = random.choice([
         'como a IAtlas funciona e por que é diferente de um buscador de passagens',
         'a paralisia de escolha em viagens: por que as pessoas não viajam mesmo tendo dinheiro',
@@ -183,6 +226,12 @@ POST X/TWITTER (máx 280 caracteres): versão mais curta e direta do mesmo tema.
 
 IMAGE PROMPT INSTAGRAM (4:5 vertical): cena de viagem autêntica relacionada ao tema. Sem texto. Cor de acento terracota (#C8662E).
 IMAGE PROMPT X (16:9 horizontal): mesma cena adaptada para paisagem ampla.
+
+VOZ E ESTILO — DONNA CMO (seguir obrigatoriamente):
+{donna_voice}
+
+POSTS RECENTES — NÃO REPETIR tema, abertura ou estrutura:
+{recent_log}
 
 Gere os 4 campos usando a ferramenta publish_posts."""
 
@@ -208,12 +257,17 @@ Gere os 4 campos usando a ferramenta publish_posts."""
     )
     for block in msg.content:
         if block.type == 'tool_use' and block.name == 'publish_posts':
-            return block.input
+            result = block.input
+            primeira = result.get('instagram', '').split('\n')[0].strip()
+            append_cmo_log('INSTAGRAM', f'institucional / {topic[:60]}', primeira)
+            return result
     raise RuntimeError('Claude não retornou tool_use esperado')
 
 
 def generate_posts(deals: list[dict], target_date: date) -> dict:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    donna_voice = read_donna_voice()
+    recent_log  = read_cmo_log()
 
     deals_text = '\n'.join(
         f"- {d['from']} → {d['to']}: a partir de R$ {d['price']:,.0f}".replace(',', '.')
@@ -276,6 +330,12 @@ Format: 4:5 vertical. No text overlay. Brand accent: terracotta orange (#C8662E)
 IMAGE PROMPT X/TWITTER — mesmo conceito e destino, mas formato paisagem 16:9 horizontal, adequado para timeline do X.
 Wide establishing shot, dramatic landscape, cinematic feel. Same brand accent terracotta orange (#C8662E). No text overlay.
 
+VOZ E ESTILO — DONNA CMO (seguir obrigatoriamente):
+{donna_voice}
+
+POSTS RECENTES — NÃO REPETIR tema, abertura ou estrutura:
+{recent_log}
+
 Gere os 4 campos usando a ferramenta publish_posts."""
 
     tools = [
@@ -317,7 +377,11 @@ Gere os 4 campos usando a ferramenta publish_posts."""
 
     for block in msg.content:
         if block.type == 'tool_use' and block.name == 'publish_posts':
-            return block.input
+            result = block.input
+            primeira = result.get('instagram', '').split('\n')[0].strip()
+            rota = f"{deals[0]['from']}→{deals[0]['to']} R${deals[0]['price']:.0f}" if deals else 'rota'
+            append_cmo_log('INSTAGRAM', f'{post_format} / {rota}', primeira)
+            return result
 
     raise RuntimeError('Claude não retornou tool_use esperado')
 
