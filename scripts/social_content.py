@@ -14,8 +14,31 @@ import anthropic
 
 ROUTES_HISTORY_FILE = os.path.expanduser('~/.vsd_recent_routes.json')
 
-CMO_LOG_DIR = os.path.expanduser('~/Documents/Pessoal/Claude Cowork/empresa-solo/CMO')
-CMO_PROJECT = 'vsd'
+CMO_LOG_DIR   = os.path.expanduser('~/Documents/Pessoal/Claude Cowork/empresa-solo/CMO')
+CMO_PROJECT   = 'vsd'
+CADENCIA_FILE = os.path.expanduser('~/.social_cadencia.json')
+BUFFER_DELIM  = '\n\n---- PROMPT IMAGEM · apagar antes de publicar ----\n'
+
+
+def get_days_since_last_post() -> int:
+    try:
+        with open(CADENCIA_FILE) as f:
+            data = json.load(f)
+        last = date.fromisoformat(data.get(CMO_PROJECT, '2000-01-01'))
+        return (date.today() - last).days
+    except (OSError, json.JSONDecodeError, ValueError):
+        return 999
+
+
+def update_last_post_date():
+    try:
+        with open(CADENCIA_FILE) as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        data = {}
+    data[CMO_PROJECT] = str(date.today())
+    with open(CADENCIA_FILE, 'w') as f:
+        json.dump(data, f)
 
 
 def read_donna_voice() -> str:
@@ -275,7 +298,11 @@ def generate_posts(deals: list[dict], target_date: date) -> dict:
     )
 
     import random
-    post_format = random.choice(['quanto_custa', 'filtro_perfil', 'iatlas_cta'])
+    post_format = random.choices(
+        ['quanto_custa', 'filtro_perfil', 'iatlas_cta', 'foi_real'],
+        weights=[4, 3, 2, 1],
+        k=1
+    )[0]
 
     # Exemplos de filtros de perfil de viagem para variar o conteúdo
     filtros = random.choice([
@@ -312,10 +339,18 @@ Se "filtro_perfil":
   CTA: "comenta o que você prefere: {filtros[0]} ou [oposto]?"
 
 Se "iatlas_cta":
-  Pilar 2/3 — apresenta a IAtlas de forma intrigante.
+  Pilar 3 — apresenta a IAtlas de forma intrigante.
   Ex: "Você não sabe pra onde viajar. A gente sabe. Responde 3 perguntas e a IAtlas te mostra o destino ideal pro seu budget."
   Tom: desafiador. "Testa aí" é melhor que "clique aqui".
   CTA: direciona pro app.
+
+Se "foi_real":
+  Pilar 4 — relato/experiência real de viajante usando os deals disponíveis.
+  Tom: narrativo, primeira pessoa implícita, como se um amigo contasse.
+  Mostre o destino da rota mais barata como vivência concreta: o que se faz lá, como é chegar, o que surpreende.
+  Ex: "Fui pra Lisboa com R$2.800 tudo incluso. Isso não é viagem de rico. É questão de saber quando comprar."
+  Mencione o preço como dado de contexto, não como argumento principal — o argumento é a experiência.
+  CTA: "comenta se já foi" ou "manda pra quem ainda acha que é caro demais".
 
 Sempre PT-BR. 3-4 hashtags no final do Instagram, nunca no meio.
 
@@ -428,23 +463,31 @@ def main():
     deals, has_fresh = fetch_best_deals(target_date)
 
     if not has_fresh or not deals:
-        print('[VsD] Sem dados frescos de passagens. Gerando post institucional...')
+        days_silent = get_days_since_last_post()
+        if days_silent < 2:
+            print(f'[VsD] Sem dados frescos. {days_silent}d sem post — pulando dia.')
+            sys.exit(0)
+        print(f'[VsD] {days_silent}d sem post. Forçando institucional.')
         posts = generate_institutional_post()
-    else:
-        print(f'[VsD] {len(deals)} deals encontrados.')
-        for d in deals:
-            print(f"  {d['from']} → {d['to']}: R$ {d['price']:,}")
-        print('[VsD] Gerando posts via Claude...')
-        posts = generate_posts(deals, target_date)
+        buffer_create_draft(f"[INSTAGRAM]\n{posts['instagram']}{BUFFER_DELIM}{posts['image_prompt_instagram']}")
+        buffer_create_draft(f"[X/TWITTER]\n{posts['x']}{BUFFER_DELIM}{posts['image_prompt_x']}")
+        update_last_post_date()
+        print('[VsD] Concluído (institucional).')
+        sys.exit(0)
+
+    print(f'[VsD] {len(deals)} deals encontrados.')
+    for d in deals:
+        print(f"  {d['from']} → {d['to']}: R$ {d['price']:,}")
+    print('[VsD] Gerando posts via Claude...')
+    posts = generate_posts(deals, target_date)
 
     print(f'[VsD] Instagram: {posts["instagram"][:80]}...')
     print(f'[VsD] X: {posts["x"]}')
 
     print('[VsD] Enviando rascunhos ao Buffer...')
-    insta_full = f"[INSTAGRAM]\n{posts['instagram']}\n\n---\n🎨 PROMPT DE IMAGEM (4:5):\n{posts['image_prompt_instagram']}"
-    x_full = f"[X/TWITTER]\n{posts['x']}\n\n---\n🎨 PROMPT DE IMAGEM (16:9):\n{posts['image_prompt_x']}"
-    buffer_create_draft(insta_full)
-    buffer_create_draft(x_full)
+    buffer_create_draft(f"[INSTAGRAM]\n{posts['instagram']}{BUFFER_DELIM}{posts['image_prompt_instagram']}")
+    buffer_create_draft(f"[X/TWITTER]\n{posts['x']}{BUFFER_DELIM}{posts['image_prompt_x']}")
+    update_last_post_date()
 
     # Registra rotas usadas hoje para evitar repetição amanhã
     if deals:
