@@ -70,13 +70,16 @@ def read_cmo_log(days: int = 10) -> str:
 
 
 def append_cmo_log(rede: str, tema: str, primeira_linha: str):
-    os.makedirs(CMO_LOG_DIR, exist_ok=True)
-    log_path = os.path.join(CMO_LOG_DIR, f'{CMO_PROJECT}-log.md')
-    if not os.path.exists(log_path):
-        with open(log_path, 'w') as f:
-            f.write(f'# LOG — Social {CMO_PROJECT.upper()}\n\nFormato: `[DATA] [REDE] tema — abertura`\n\n---\n\n')
-    with open(log_path, 'a') as f:
-        f.write(f'[{date.today()}] [{rede}] {tema} — {primeira_linha[:120]}\n')
+    try:
+        os.makedirs(CMO_LOG_DIR, exist_ok=True)
+        log_path = os.path.join(CMO_LOG_DIR, f'{CMO_PROJECT}-log.md')
+        if not os.path.exists(log_path):
+            with open(log_path, 'w') as f:
+                f.write(f'# LOG — Social {CMO_PROJECT.upper()}\n\nFormato: `[DATA] [REDE] tema — abertura`\n\n---\n\n')
+        with open(log_path, 'a') as f:
+            f.write(f'[{date.today()}] [{rede}] {tema} — {primeira_linha[:120]}\n')
+    except Exception as e:
+        print(f'[warn] append_cmo_log falhou (não-fatal): {e}')
 
 SUPABASE_URL      = 'https://fdpgeacfeyzaocsqszyw.supabase.co/rest/v1'
 SUPABASE_ANON_KEY = os.environ['VSD_SUPABASE_ANON_KEY']
