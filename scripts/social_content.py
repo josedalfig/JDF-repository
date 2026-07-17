@@ -12,11 +12,61 @@ import requests
 from datetime import date, timedelta
 import anthropic
 
+import random as _random
+
 ROUTES_HISTORY_FILE = os.path.expanduser('~/.vsd_recent_routes.json')
 
 CMO_LOG_DIR   = os.path.expanduser('~/Documents/Pessoal/Claude Cowork/empresa-solo/CMO')
 CMO_PROJECT   = 'vsd'
 CADENCIA_FILE = os.path.expanduser('~/.social_cadencia.json')
+
+# ── Image moods (embutido; CI não acessa ~/Documents) ────────────────────────
+# Fonte: CMO/imagem-moods-vsd-zeebra.md § VsD (Cameron→Donna 08/07)
+_MOODS = [
+    ('costa_praia',
+     'pessoa real olhando o mar numa orla ao amanhecer azul, areia clara, tons frios, foto documental, sem filtro quente'),
+    ('noite_cidade',
+     'rua movimentada à noite, luzes de letreiro, reflexos no chão molhado, pessoa real caminhando, atmosfera urbana'),
+    ('mercado_comida',
+     'banca de mercado local cheia de cor, especiarias e frutas, luz difusa, mãos escolhendo produto, close documental'),
+    ('estrada_paisagem',
+     'estrada vazia cortando paisagem verde, céu amplo, pessoa pequena no enquadramento, luz de dia, sensação de distância'),
+    ('chuva_clima',
+     'cidade na chuva, reflexos coloridos no asfalto, guarda-chuva, tom cinza-azulado, foto real melancólica'),
+    ('interior_arquitetura',
+     'interior de café aconchegante, luz de janela, texturas de madeira e tijolo, pessoa lendo, foto real intimista'),
+]
+_MOOD_NAMES = [m[0] for m in _MOODS]
+
+# terracota: ~metade na cena, ~metade só no overlay
+_TERRACOTA_SCENE  = 'Include a real terracotta-orange (#C8662E) element in the scene (wall, door, awning, tile, or clothing) — terracotta ≤15% of frame area.'
+_TERRACOTA_OVERLAY = 'No terracotta in the scene itself; terracotta (#C8662E) lives only in the UI overlay (headline, tag, logo).'
+
+
+def _pick_mood() -> tuple[str, str, bool]:
+    """Returns (mood_name, seed, terracota_in_scene).
+    Avoids repeating the last mood used (read from CADENCIA_FILE)."""
+    try:
+        with open(CADENCIA_FILE) as f:
+            data = json.load(f)
+        last = data.get(f'{CMO_PROJECT}_last_mood', '')
+    except (OSError, json.JSONDecodeError):
+        last = ''
+    candidates = [m for m in _MOODS if m[0] != last] or _MOODS
+    name, seed = _random.choice(candidates)
+    terracota_scene = _random.random() < 0.5
+    return name, seed, terracota_scene
+
+
+def _save_mood(mood_name: str):
+    try:
+        with open(CADENCIA_FILE) as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        data = {}
+    data[f'{CMO_PROJECT}_last_mood'] = mood_name
+    with open(CADENCIA_FILE, 'w') as f:
+        json.dump(data, f)
 BUFFER_DELIM  = '\n\n---- PROMPT IMAGEM · apagar antes de publicar ----\n'
 
 
@@ -230,6 +280,8 @@ def generate_institutional_post() -> dict:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     donna_voice = read_donna_voice()
     recent_log  = read_cmo_log()
+    mood_name, mood_seed, terra_scene = _pick_mood()
+    terra_rule = _TERRACOTA_SCENE if terra_scene else _TERRACOTA_OVERLAY
     topic = random.choice([
         'como a IAtlas funciona e por que é diferente de um buscador de passagens',
         'a paralisia de escolha em viagens: por que as pessoas não viajam mesmo tendo dinheiro',
@@ -250,8 +302,10 @@ Sem markdown. Sem asteriscos. 3-4 hashtags no final do Instagram.
 
 POST X/TWITTER (máx 280 caracteres): versão mais curta e direta do mesmo tema.
 
-IMAGE PROMPT INSTAGRAM (4:5 vertical): cena de viagem autêntica relacionada ao tema. Sem texto. Cor de acento terracota (#C8662E).
-IMAGE PROMPT X (16:9 horizontal): mesma cena adaptada para paisagem ampla.
+IMAGE PROMPT INSTAGRAM (4:5 vertical) — em inglês, para Midjourney/DALL-E:
+Mood: {mood_name}. Scene seed: "{mood_seed}". Real travel photo, real people, real places. No stock, no luxury. Leave room for Fraunces overlay (price tag, logo). Format: 4:5 vertical. No text overlay. {terra_rule}
+
+IMAGE PROMPT X (16:9 horizontal): same mood and scene adapted to wide landscape. Cinematic, dramatic sky or foreground. {terra_rule}
 
 VOZ E ESTILO — DONNA CMO (seguir obrigatoriamente):
 {donna_voice}
@@ -286,6 +340,7 @@ Gere os 4 campos usando a ferramenta publish_posts."""
             result = block.input
             primeira = result.get('instagram', '').split('\n')[0].strip()
             append_cmo_log('INSTAGRAM', f'institucional / {topic[:60]}', primeira)
+            _save_mood(mood_name)
             return result
     raise RuntimeError('Claude não retornou tool_use esperado')
 
@@ -306,6 +361,8 @@ def generate_posts(deals: list[dict], target_date: date) -> dict:
         weights=[4, 3, 2, 1],
         k=1
     )[0]
+    mood_name, mood_seed, terra_scene = _pick_mood()
+    terra_rule = _TERRACOTA_SCENE if terra_scene else _TERRACOTA_OVERLAY
 
     prompt = f"""Você é o copywriter do "Viajar sem Destino" (@viajarsemdestino.oficial).
 
@@ -355,14 +412,10 @@ Sempre PT-BR. 3-4 hashtags no final do Instagram, nunca no meio.
 
 POST X/TWITTER (máx 280 caracteres): versão telegráfica, mais ácida/direta. Use "a partir de R$X" para preços.
 
-IMAGE PROMPT INSTAGRAM — em inglês, para gerador de imagem (Midjourney/DALL-E):
-Travel photo of the featured destination. Style: authentic travel photography, golden hour or blue hour, vibrant but realistic colors.
-Must feel achievable, not luxury. Real people, real places. No stock photo feel.
-Include city name and specific visual references (landmark, street, nature).
-Format: 4:5 vertical. No text overlay. Brand accent: terracotta orange (#C8662E).
+IMAGE PROMPT INSTAGRAM (4:5 vertical) — em inglês, para Midjourney/DALL-E:
+Mood: {mood_name}. Scene seed: "{mood_seed}". Real travel photo set in or near the destination above. Real people, real places. No stock, no luxury. Include city name and 1-2 specific visual references (landmark, street, food, nature). Leave room for Fraunces overlay. Format: 4:5 vertical. No text overlay. {terra_rule}
 
-IMAGE PROMPT X/TWITTER — mesmo conceito e destino, mas formato paisagem 16:9 horizontal, adequado para timeline do X.
-Wide establishing shot, dramatic landscape, cinematic feel. Same brand accent terracotta orange (#C8662E). No text overlay.
+IMAGE PROMPT X/TWITTER (16:9 horizontal): same mood and destination, wide establishing shot. Cinematic, dramatic sky or foreground. No text overlay. {terra_rule}
 
 VOZ E ESTILO — DONNA CMO (seguir obrigatoriamente):
 {donna_voice}
@@ -415,6 +468,7 @@ Gere os 4 campos usando a ferramenta publish_posts."""
             primeira = result.get('instagram', '').split('\n')[0].strip()
             rota = f"{deals[0]['from']}→{deals[0]['to']} R${deals[0]['price']:.0f}" if deals else 'rota'
             append_cmo_log('INSTAGRAM', f'{post_format} / {rota}', primeira)
+            _save_mood(mood_name)
             return result
 
     raise RuntimeError('Claude não retornou tool_use esperado')
