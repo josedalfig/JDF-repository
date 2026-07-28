@@ -350,8 +350,16 @@ def generate_posts(deals: list[dict], target_date: date) -> dict:
     donna_voice = read_donna_voice()
     recent_log  = read_cmo_log()
 
+    _DOMESTIC_IATAS = {
+        'GRU','CGH','SDU','GIG','BSB','SSA','FOR','REC','CWB','POA',
+        'FLN','NAT','BEL','MAN','MCZ','THE','JPA','AJU','VIX','PMW',
+    }
+    def _is_domestic(d):
+        return d.get('from_iata', d['from'][:3].upper()) in _DOMESTIC_IATAS and \
+               d.get('to_iata',   d['to'][:3].upper())   in _DOMESTIC_IATAS
+
     deals_text = '\n'.join(
-        f"- {d['from']} → {d['to']}: a partir de R$ {d['price']:,.0f}".replace(',', '.')
+        f"- [{('NAC' if _is_domestic(d) else 'INTL')}] {d['from']} → {d['to']}: a partir de R$ {d['price']:,.0f}".replace(',', '.')
         for d in deals
     )
 
@@ -373,6 +381,32 @@ Diferencial: o app tem a IAtlas — uma IA que faz uma entrevista rápida e enco
 
 Deals de passagens encontrados hoje ({target_date}):
 {deals_text}
+
+REGRAS DE COPY (aplicar obrigatoriamente):
+
+Tom:
+- Seco e provocativo, com ponto de vista — não bot de alerta de promoção.
+- Uma ideia por post. Frases curtas.
+- Varie o gancho de abertura. Rotacione entre:
+  • contraste temporal: "Semana passada, R$ 900. Hoje, R$ 319."
+  • cena/sensação: "A cordilheira aparece na janela antes de você perceber o quanto gastou."
+  • pergunta: "R$ 600 e três dias. Pra onde você vai primeiro?"
+  • insight seco: "Voo de terça sai mais barato. Só isso."
+- Proibido fechar com comparação de gasto ("menos que um jantar") — máx. 1 a cada 4 posts.
+- Sem exclamação em rajada. Sem "imperdível/corre/última chance".
+
+Anti-repetição:
+- "Você tem R$__ e uma semana" → máx. 1 a cada 5 posts.
+- "R$ X. [Origem] pra [Destino]." como abertura → máx. 2 posts seguidos.
+- "Não é engano. Não é..." → aposentado, não usar.
+- Varie o conector: "pra", "→", "rumo a" — não fixe um só.
+
+Nacional × Internacional (para pilares quanto_custa e me_da_um_budget):
+- Alvo: ~60% nacional / 40% internacional por bloco de 5 ofertas.
+- Nunca mais de 2 nacionais seguidas.
+- Ao menos 1 internacional a cada 3 ofertas.
+- LATAM próximo (Buenos Aires, Santiago, Montevidéu, Assunção) conta como internacional.
+- Os deals acima estão marcados [NAC] ou [INTL] — use essa informação para escolher qual destacar.
 
 FORMATO DO POST DE HOJE: {post_format}
 
