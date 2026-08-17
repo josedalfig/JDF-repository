@@ -225,7 +225,7 @@ def fetch_best_deals(target_date: date) -> tuple[list[dict], bool]:
             'apikey':        SUPABASE_ANON_KEY,
             'Authorization': f'Bearer {SUPABASE_ANON_KEY}',
         },
-        timeout=15,
+        timeout=45,
     )
     resp.raise_for_status()
     rows = resp.json()
@@ -532,7 +532,7 @@ def buffer_create_draft(text: str):
             'Authorization': f'Bearer {BUFFER_ACCESS_TOKEN}',
             'Content-Type':  'application/json',
         },
-        timeout=15,
+        timeout=45,
     )
     resp.raise_for_status()
     data = resp.json()
