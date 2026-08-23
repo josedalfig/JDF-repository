@@ -412,9 +412,9 @@ FORMATO DO POST DE HOJE: {post_format}
 
 Se "quanto_custa":
   Pilar 1 — choque positivo com o preço real. Gancho provocativo → revela preço → CTA.
-  Ex de gancho: "Você acha que Lisboa é caro? Espera ver isso." / "R$2.300. Esse é o preço de ir pra fora do Brasil."
   Use "a partir de R$ X" nos preços. Mostre 1 ou 2 rotas dos deals acima.
   CTA opcional: "salva pra não esquecer" ou "manda pra quem você quer levar".
+  PROIBIDO como abertura: "Você acha que [destino] é caro", "Excesso de escolha", "Quanto custa ir pra", qualquer variação dessas frases. Varie sempre o gancho — abra com o preço direto, com uma pergunta diferente, com uma observação sobre o destino, com um dado de contexto.
 
 Se "me_da_um_budget":
   Pilar 2 — "tenho R$X e X dias, pra onde eu vou?" Simula a pergunta real do usuário.
@@ -441,6 +441,14 @@ Se "foi_real":
 
 Qualquer que seja o formato, o CTA é OPCIONAL e deve ser natural — não force se o post já fecha bem sem ele.
 A IAtlas pode ser mencionada como reforço em qualquer formato, mas nunca como tema principal (exceto me_da_um_budget).
+
+ANTI-REPETIÇÃO OBRIGATÓRIA — nunca use como abertura do post:
+- "Você acha que [destino/viagem] é caro"
+- "Excesso de escolha"
+- "Quanto custa ir pra"
+- "Você sabia que"
+- Qualquer variação dessas frases
+Varie sempre: abra com o número direto, com uma observação sobre o destino, com uma pergunta inusitada, com um dado surpreendente, com uma cena concreta.
 
 Sempre PT-BR. 3-4 hashtags no final do Instagram, nunca no meio.
 
