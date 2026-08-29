@@ -7,7 +7,7 @@ on:
 
 jobs:
   post:
-    runs-on: [self-hosted, mac-jose-local]
+    runs-on: [self-hosted, vsd-runner]
 
     env:
       VSD_SUPABASE_ANON_KEY:            ${{ secrets.VSD_SUPABASE_ANON_KEY }}
