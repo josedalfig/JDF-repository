@@ -447,6 +447,13 @@ Se "viajante_real":
 Qualquer que seja o formato, o CTA é OPCIONAL e deve ser natural — não force se o post já fecha bem sem ele.
 IAtlas: só em "quanto_custa" e "viajante_real", e mesmo assim apenas se couber naturalmente. Nunca como tema principal, nunca mais de 1 menção por semana.
 
+FEATURES DO APP QUE PODEM APARECER NOS POSTS (use quando fizer sentido, nunca como lista de funcionalidades):
+- Filtros de perfil: o app permite filtrar destinos por tipo de viagem (praia, frio, aventura, cultura, gastronômico etc.)
+- Visualização em mapa: o usuário vê os destinos disponíveis no mapa — não é lista, é geografia
+- Clima do destino: o app mostra o clima atual E o clima estimado para a data que o usuário quer viajar
+- Tags de cidade: cada destino tem tags descritivas (ex: "agitado", "família", "vida noturna", "natureza") que ajudam a escolher sem ler review nenhum
+Essas features são ângulos de post, não lista de venda. Ex: "Você coloca o mês que quer viajar e o app já te mostra como vai estar o tempo lá." ou "Tem gente que escolhe destino pelo clima e nunca sabe o clima antes de ir."
+
 ANTI-REPETIÇÃO OBRIGATÓRIA — nunca use como abertura do post:
 - "Você acha que [destino/viagem] é caro"
 - "Excesso de escolha"
