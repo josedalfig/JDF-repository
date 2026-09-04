@@ -365,8 +365,8 @@ def generate_posts(deals: list[dict], target_date: date) -> dict:
 
     import random
     post_format = random.choices(
-        ['quanto_custa', 'me_da_um_budget', 'ninguem_te_conta', 'foi_real'],
-        weights=[4, 3, 2, 1],
+        ['quanto_custa', 'ninguem_te_conta', 'foi_real', 'destino_vivo', 'viajante_real'],
+        weights=[2, 2, 2, 2, 2],
         k=1
     )[0]
     mood_name, mood_seed, terra_scene = _pick_mood()
@@ -411,36 +411,41 @@ Nacional × Internacional (para pilares quanto_custa e me_da_um_budget):
 FORMATO DO POST DE HOJE: {post_format}
 
 Se "quanto_custa":
-  Pilar 1 — choque positivo com o preço real. Gancho provocativo → revela preço → CTA.
-  Use "a partir de R$ X" nos preços. Mostre 1 ou 2 rotas dos deals acima.
-  CTA opcional: "salva pra não esquecer" ou "manda pra quem você quer levar".
-  PROIBIDO como abertura: "Você acha que [destino] é caro", "Excesso de escolha", "Quanto custa ir pra", qualquer variação dessas frases. Varie sempre o gancho — abra com o preço direto, com uma pergunta diferente, com uma observação sobre o destino, com um dado de contexto.
-
-Se "me_da_um_budget":
-  Pilar 2 — "tenho R$X e X dias, pra onde eu vou?" Simula a pergunta real do usuário.
-  Usa os deals disponíveis como resposta concreta: com esse budget, dá pra ir pra X ou Y.
-  Inclui menção ao perfil da viagem (frio, cultura, praia, aventura, etc.) de forma natural.
-  Mencione que no app a IAtlas faz exatamente isso — cruza budget + perfil e aponta o destino.
-  CTA opcional: "comenta qual é o seu budget" ou "testa aí no app".
+  Preço como revelação, não como argumento central. Gancho provocativo → preço → fecha.
+  Use "a partir de R$ X". Mostre 1 rota dos deals. O post é sobre o destino, o preço é a surpresa.
+  PROIBIDO abrir com: "Você acha que X é caro", "dinheiro pra viajar", "viajar é caro", qualquer variação.
+  Abra com o destino, uma cena, uma sensação — o preço aparece no meio ou no fim.
+  CTA opcional e natural.
 
 Se "ninguem_te_conta":
-  Pilar 3 — dado, verdade ou comportamento que o viajante médio não sabe (mas deveria).
-  Ex: "Os preços de passagem caem nas quartas. A maioria compra no sábado e paga 40% a mais."
-  Ex: "GRU pra Lisboa em outubro custa R$2.200. Em julho, R$5.800. Mesmo assento, mesmo avião."
-  Use os dados dos deals como evidência, não como protagonista do post.
-  Tom: revelador, sem sensacionalismo. Fato seco + implicação prática.
-  CTA opcional: "salva isso" ou "passa pra frente".
+  Um dado, comportamento ou verdade que o viajante médio não sabe — pode ser sobre logística, destino, temporada, cultura local, hack de viagem real.
+  NÃO precisa ser sobre preço. Exemplos não-preço: "O aeroporto de Congonhas é o único grande aeroporto dentro de uma cidade brasileira. Em 40 minutos você tá no centro de SP." / "Cartagena tem temporada de chuvas que a maioria ignora — e é exatamente quando fica mais barato e menos lotado."
+  Tom: revelador e seco. Fato + implicação. Sem sensacionalismo.
 
 Se "foi_real":
-  Pilar 4 — relato/experiência real de viajante usando os deals disponíveis.
-  Tom: narrativo, primeira pessoa implícita, como se um amigo contasse.
-  Mostre o destino da rota mais barata como vivência concreta: o que se faz lá, como é chegar, o que surpreende.
-  Ex: "Fui pra Lisboa com R$2.800 tudo incluso. Isso não é viagem de rico. É questão de saber quando comprar."
-  Preço como dado de contexto, não como argumento principal — o argumento é a experiência.
-  CTA opcional: "comenta se já foi" ou "manda pra quem ainda acha que é caro demais".
+  Relato de viagem — o que aconteceu, o que surpreendeu, o que ficou.
+  ZERO foco em preço. O preço pode aparecer como dado de contexto no máximo em uma frase, nunca como argumento.
+  O protagonista é a experiência: a cidade, o momento, o que a pessoa sentiu ou descobriu.
+  Tom: narrativo, primeira pessoa implícita, como se um amigo contasse no WhatsApp.
+  Use o destino dos deals como inspiração geográfica, não precisa citar o preço da passagem.
+
+Se "destino_vivo":
+  NOVO — post inteiramente sobre um destino. Sem preço, sem deal, sem budget.
+  Escolha um dos destinos dos deals como ponto de partida geográfico e escreva sobre o lugar:
+  o que fazer, o que comer, quando ir, o que surpreende quem chega pela primeira vez, o que a maioria dos turistas erra.
+  Tom: de quem já foi e quer que o amigo vá também. Específico, concreto, sem clichê de guia turístico.
+  Ex: "Buenos Aires tem bairros que ninguém te conta. La Boca é pra foto. Palermo é onde a cidade acontece."
+  CTA: "comenta se já foi" ou "salva pra quando for".
+
+Se "viajante_real":
+  NOVO — perfil, comportamento ou insight sobre o tipo de viajante que o VsD fala.
+  Sem preço, sem deal. Sobre a mentalidade, o hábito, a forma de viajar.
+  Ex: "Tem gente que passa 6 meses planejando uma viagem e nunca compra a passagem. Tem gente que compra e planeja no avião." / "A diferença entre quem viaja muito e quem não viaja quase nunca não é a renda. É a data de compra."
+  Tom: ponto de vista. Pode ser levemente provocativo, mas não condescendente.
+  A IAtlas pode aparecer como solução natural no fim, nunca como tema.
 
 Qualquer que seja o formato, o CTA é OPCIONAL e deve ser natural — não force se o post já fecha bem sem ele.
-A IAtlas pode ser mencionada como reforço em qualquer formato, mas nunca como tema principal (exceto me_da_um_budget).
+IAtlas: só em "quanto_custa" e "viajante_real", e mesmo assim apenas se couber naturalmente. Nunca como tema principal, nunca mais de 1 menção por semana.
 
 ANTI-REPETIÇÃO OBRIGATÓRIA — nunca use como abertura do post:
 - "Você acha que [destino/viagem] é caro"
