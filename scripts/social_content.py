@@ -569,10 +569,10 @@ def main():
 
     deals, has_fresh = fetch_best_deals(target_date)
 
-    if not has_fresh or not deals:
+    if not deals:
         days_silent = get_days_since_last_post()
         if days_silent < 2:
-            print(f'[VsD] Sem dados frescos. {days_silent}d sem post — pulando dia.')
+            print(f'[VsD] Sem deals disponíveis. {days_silent}d sem post — pulando dia.')
             sys.exit(0)
         print(f'[VsD] {days_silent}d sem post. Forçando institucional.')
         posts = generate_institutional_post()
@@ -581,6 +581,8 @@ def main():
         update_last_post_date()
         print('[VsD] Concluído (institucional).')
         sys.exit(0)
+    if not has_fresh:
+        print(f'[VsD] Sem dados frescos — usando melhores preços dos últimos 7 dias.')
 
     print(f'[VsD] {len(deals)} deals encontrados.')
     for d in deals:
